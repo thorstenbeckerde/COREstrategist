@@ -130,6 +130,8 @@
         .btn-secondary:hover:not(:disabled):not(.loading) { background-color: #d1d5db; }
         .btn-danger { background-color: #dc2626; color: white; }
         .btn-danger:hover:not(:disabled):not(.loading) { background-color: #b91c1c; }
+        .btn-donate { background-color: #ec4899; color: white; }
+        .btn-donate:hover:not(:disabled):not(.loading) { background-color: #db2777; }
         #helpModal .modal-content, #messageModal .modal-content, #unlinkModal .modal-content { display: flex; flex-direction: column; max-height: 80vh; }
         #messageText, #help-scroll-content, #unlinkList { max-height: 60vh; overflow-y: auto; padding-right: 1rem;}
         body.linking-mode { cursor: crosshair; }
@@ -201,6 +203,12 @@
                 <button id="loadBtn" class="btn btn-secondary" title="Load from File (Ctrl/Cmd+O)">Load</button>
                 <button id="settingsBtn" class="btn btn-secondary" title="Settings">Settings</button>
                 <button id="helpBtn" class="btn btn-secondary" title="Help (?)">Help</button>
+                <button id="donateBtn" class="btn btn-donate" title="Support the developer">
+                    <svg class="icon" style="width: 16px; height: 16px; margin-right: 4px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
+                    </svg>
+                    Donate
+                </button>
             </div>
         </div>
 
@@ -390,6 +398,7 @@
         const exportTxtBtn = document.getElementById('exportTxtBtn');
         const exportMdBtn = document.getElementById('exportMdBtn');
         const exportHtmlBtn = document.getElementById('exportHtmlBtn');
+        const donateBtn = document.getElementById('donateBtn');
 
         // --- App State ---
         let currentView = 'canvas'; let chunkTypes = {}; let allChunkTypesList = []; let layerVisibility = {}; let chunks = []; let chunksMap = new Map();
@@ -911,6 +920,7 @@
             loadBtn.addEventListener('click', () => { if(linkingMode) cancelLinkingMode(false); if (chunks.length > 0) { showMessage("Confirm Load", "Loading a new file will clear any unsaved changes on the current canvas. Are you sure you want to proceed?", [ { text: 'Cancel', class: 'btn-secondary' }, { text: 'Load File', class: 'btn-primary', action: () => fileLoadInput.click() } ]); } else { fileLoadInput.click(); } });
             settingsBtn.addEventListener('click', () => showModal(settingsModal));
             helpBtn.addEventListener('click', () => { if(linkingMode) cancelLinkingMode(false); showModal(helpModal); });
+            donateBtn.addEventListener('click', () => window.open('https://ko-fi.com/thorstenbecker', '_blank', 'noopener,noreferrer'));
             exportTxtBtn.addEventListener('click', () => downloadFile(getCombinedTextForExport('txt'), 'chorus-export.txt', 'text/plain'));
             exportMdBtn.addEventListener('click', () => downloadFile(getCombinedTextForExport('md'), 'chorus-export.md', 'text/markdown'));
             exportHtmlBtn.addEventListener('click', () => {
