@@ -147,17 +147,37 @@
 
         /* Dropdowns */
         .dropdown { position: relative; display: inline-block; }
-        .dropdown-content { display: none; position: absolute; background-color: #f9f9f9; min-width: 160px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); z-index: 100; right: 0; border-radius: 6px; padding: 4px; }
+        .dropdown-content { 
+            display: none; 
+            position: absolute; 
+            background-color: #f9f9f9; 
+            min-width: 160px; 
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); 
+            z-index: 100; 
+            right: 0; 
+            border-radius: 6px; 
+            padding: 4px; 
+        }
         .dropdown-content button { display: block; width: 100%; text-align: left; padding: 8px 12px; }
-        .dropdown:hover .dropdown-content { display: block; }
+        .dropdown-content.show { 
+            display: block; 
+        }
         #layerControl {min-width: 220px;}
         #layerControl label { display: block; padding: 8px 12px; cursor: pointer; border-radius: 4px; }
         #layerControl label:hover { background-color: #f1f1f1; }
         #layerControl input { margin-right: 10px; }
 
+        @media (max-width: 640px) {
+            #layerControl {
+                right: auto;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+        }
+
         /* Timeline View */
         #timelineView { display: none; padding: 2rem; overflow-y: auto; height: 100%; }
-        .timeline-item { position: relative; padding: 1rem 1rem 1rem 2.5rem; border-left: 3px solid #d1d5db; margin-bottom: 1rem; }
+        .timeline-item { position: relative; padding: 1rem 1rem 1rem 2.5rem; border-left: 3px solid #d1d5db; margin-bottom: 1rem; transition: margin-left 0.3s ease-in-out; }
         .timeline-item:last-child { border-left: 3px solid transparent; }
         .timeline-dot { position: absolute; left: -9px; top: calc(1rem + 4px); width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; }
         .timeline-content { background-color: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
@@ -169,15 +189,17 @@
 <body class="bg-gray-100 text-gray-800">
     <div id="appContainer">
         <!-- Toolbar -->
-        <div class="toolbar p-3 bg-white shadow-md flex flex-col sm:flex-row sm:flex-wrap items-center justify-between gap-2 print:hidden">
-            <div class="flex items-center space-x-2 w-full sm:w-auto justify-center sm:justify-start mb-2 sm:mb-0">
+        <div class="toolbar p-3 bg-white shadow-md flex flex-wrap items-center justify-center sm:justify-between gap-2 print:hidden">
+            <!-- Group 1 -->
+            <div class="flex items-center flex-wrap justify-center gap-2">
                 <button id="addChunkBtn" class="btn btn-primary" title="Add Chunk (A)">Add</button>
                 <button id="templatesBtn" class="btn btn-secondary" title="Load a strategic template">Templates</button>
                 <button id="clearCanvasBtn" class="btn btn-danger" title="Clear Canvas">Clear</button>
                 <button id="undoDeleteBtn" class="btn btn-secondary" title="Undo Last Delete (Ctrl/Cmd+Z)" disabled>Undo</button>
             </div>
 
-            <div class="flex items-center space-x-2 w-full sm:w-auto justify-center mb-2 sm:mb-0">
+            <!-- Group 2 -->
+            <div class="flex items-center flex-wrap justify-center gap-2">
                  <button id="summarizeBtn" class="btn btn-secondary" title="Summarize the board with AI">AI Summary</button>
                  <button id="viewToggleBtn" class="btn btn-secondary" title="Toggle Canvas/Timeline View">Timeline View</button>
                  <div class="dropdown">
@@ -189,7 +211,8 @@
                 <button id="zoomResetBtn" class="btn btn-secondary" title="Reset Zoom (0)">100%</button>
             </div>
 
-            <div class="flex flex-col items-center sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-1 w-full sm:w-auto justify-center sm:justify-end">
+            <!-- Group 3 -->
+            <div class="flex items-center flex-wrap justify-center gap-2">
                 <span id="chunkCountDisplay" class="text-sm text-gray-500 mx-2">Chunks: 0</span>
                  <div class="dropdown">
                     <button class="btn btn-secondary">Export</button>
@@ -387,7 +410,7 @@
         const ICON_LINK = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" /></svg>`;
         const ICON_UNLINK = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244m-9.951-2.206a4.5 4.5 0 006.364-6.364L9.65 3.65m-3.069 3.069L3.5 9.787m0 0L1.454 7.742M3.5 9.787l2.046 2.046M3 3l18 18" /></svg>`;
         const ICON_LINKING_ACTIVE = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="animate-pulse"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" /></svg>`;
-        const ICON_DELETE = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>`;
+        const ICON_DELETE = `<svg xmlns="http="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>`;
         const ICON_AI_SPARKLE = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.25 10.5l-1.5-1.5 1.5-1.5 1.5 1.5-1.5 1.5ZM16.5 3.75l-1.5-1.5 1.5-1.5 1.5 1.5-1.5 1.5Z" /></svg>`;
 
         // --- DOM Elements Cache ---
@@ -553,14 +576,65 @@
                 applyTransform();
             }
         }
+        
         function renderTimelineView() {
             timelineView.innerHTML = '';
-            if (chunks.length === 0) { timelineView.innerHTML = '<p class="text-center text-gray-500">No chunks to display in timeline.</p>'; return; }
-            const sortedChunks = [...chunks].sort((a, b) => a.y - b.y);
-            sortedChunks.forEach(chunk => {
+            if (chunks.length === 0) {
+                timelineView.innerHTML = '<p class="text-center text-gray-500">No chunks to display in timeline.</p>';
+                return;
+            }
+
+            const renderedChunks = [];
+            const visited = new Set();
+            const MAX_INDENT = 3;
+
+            // Calculate in-degrees (how many links point to a chunk)
+            const inDegree = new Map(chunks.map(chunk => [chunk.id, 0]));
+            chunks.forEach(chunk => {
+                if (chunk.nextChunkIds) {
+                    chunk.nextChunkIds.forEach(targetId => {
+                        if (inDegree.has(targetId)) {
+                            inDegree.set(targetId, inDegree.get(targetId) + 1);
+                        }
+                    });
+                }
+            });
+
+            // Recursive function to traverse the graph and build the hierarchical list
+            function traverse(chunkId, level) {
+                if (!chunkId || visited.has(chunkId)) return;
+                
+                const chunk = chunksMap.get(chunkId);
+                if (!chunk) return;
+
+                visited.add(chunkId);
+                renderedChunks.push({ chunk, level });
+
+                if (chunk.nextChunkIds) {
+                    chunk.nextChunkIds.forEach(nextId => {
+                        traverse(nextId, Math.min(level + 1, MAX_INDENT));
+                    });
+                }
+            }
+
+            // Start traversal from root nodes (in-degree 0)
+            const startNodes = chunks.filter(chunk => inDegree.get(chunk.id) === 0);
+            startNodes.forEach(chunk => traverse(chunk.id, 0));
+
+            // Traverse any remaining nodes (e.g., in cycles or disconnected graphs)
+            chunks.forEach(chunk => {
+                if (!visited.has(chunk.id)) {
+                    traverse(chunk.id, 0);
+                }
+            });
+
+            // Render the items with the calculated indentation
+            renderedChunks.forEach(({ chunk, level }) => {
                 const color = COLORS.find(c => c.name === chunk.colorName);
                 const item = document.createElement('div');
                 item.className = 'timeline-item';
+                item.style.marginLeft = `${level * 2.5}rem`; 
+
                 item.innerHTML = `
                     <div class="timeline-dot ${color?.tailwindClass.replace('text-', 'bg-') || 'bg-gray-500'}"></div>
                     <div class="timeline-content">
@@ -572,6 +646,7 @@
                 timelineView.appendChild(item);
             });
         }
+
 
         // --- Layer Management ---
         function setupLayerControls() {
@@ -693,6 +768,22 @@
         async function handleSuggestNextChunk() { const sourceChunkData = chunksMap.get(activeAiChunkId); if (!sourceChunkData) { showMessage("Error", "Could not find the source chunk to generate a suggestion from."); return; } const prompt = `Based on the following text from a strategic planning note, suggest the content for a new, subsequent note that logically follows it. The new note should be a natural continuation, a counter-point, or an expansion. Provide ONLY the text for the new note itself, without any introductory phrases. CONTEXT:\n${sourceChunkData.text}`; const newText = await callGemini(prompt, aiActionSuggestNextBtn); if (newText) { const newChunkDetails = { type: allChunkTypesList.find(ct => ct.tag === "#action") || allChunkTypesList[0], shape: SHAPES.find(s => s.name === "Square") || SHAPES[0], color: COLORS.find(c => c.name === "Grey") || COLORS[0], }; const newChunkOptions = { text: `<p>${newText.replace(/\n/g, '<br>')}</p>`, x: sourceChunkData.x + sourceChunkData.width + 40, y: sourceChunkData.y }; const newChunkData = addChunkToCanvas(newChunkDetails, newChunkOptions); if (!sourceChunkData.nextChunkIds.includes(newChunkData.id)) { sourceChunkData.nextChunkIds.push(newChunkData.id); } drawConnections(); updateSelectedVisuals(); hideModal(aiActionModal); showMessage("AI Suggestion", "A new chunk has been created and linked based on your previous note."); } }
 
         // --- Chunk Management & Selection ---
+        function openEditChunkModal(chunkId) {
+            const chunkData = chunksMap.get(chunkId);
+            if (!chunkData) {
+                showMessage("Error", "Could not find the chunk to edit.");
+                return;
+            }
+
+            editingChunkIdInput.value = chunkId;
+
+            populateSelectWithOptions(editChunkTypeSelect, null, chunkData.chunkTypeTag, chunkTypes, key => key.charAt(0).toUpperCase() + key.slice(1) + " Types");
+            populateSelectWithOptions(editChunkShapeSelect, SHAPES.map(s => ({ value: s.name, text: `${s.symbol} ${s.name} - ${s.meaning}` })), chunkData.shapeName);
+            populateSelectWithOptions(editChunkColorSelect, COLORS.map(c => ({ value: c.name, text: `${c.symbol} ${c.name} - ${c.essence}` })), chunkData.colorName);
+
+            showModal(editChunkModal);
+        }
+
         function updateChunkHeaderDisplay(chunkId) { const chunkElement = document.getElementById(chunkId); const chunkData = chunksMap.get(chunkId); if (!chunkElement || !chunkData) return; const headerTitle = chunkElement.querySelector('.chunk-header-title'); if (headerTitle) { const selectedShape = SHAPES.find(s => s.name === chunkData.shapeName); const selectedColor = COLORS.find(c => c.name === chunkData.colorName); headerTitle.innerHTML = `<span class="tag">${chunkData.chunkTypeTag}</span> | <span class="shape-symbol ${selectedColor?.tailwindClass || ''}">${selectedShape?.symbol || ''}</span> <span class="color-symbol ${selectedColor?.tailwindClass || ''}">${selectedColor?.symbol || ''}</span>`; } }
         function updateSelectedVisuals() { document.querySelectorAll('.chorus-chunk').forEach(el => { const chunkData = chunksMap.get(el.id); if (!chunkData) return; const isSelected = el.id === selectedChunkId; const isLinkingSource = el.id === linkingSourceChunkId; el.classList.toggle('selected-chunk', isSelected && !linkingMode); el.classList.toggle('linking-source-chunk', isLinkingSource && linkingMode); const linkButton = el.querySelector('.link-chunk-btn'); if (linkButton) { if (isLinkingSource && linkingMode) { linkButton.innerHTML = ICON_LINKING_ACTIVE; linkButton.title = 'Cancel Linking'; linkButton.classList.add('linking-active'); } else if (chunkData.nextChunkIds && chunkData.nextChunkIds.length > 0) { linkButton.innerHTML = ICON_UNLINK; linkButton.title = `Manage Links (${chunkData.nextChunkIds.length})`; linkButton.classList.remove('linking-active'); } else { linkButton.innerHTML = ICON_LINK; linkButton.title = 'Link to Next Chunk'; linkButton.classList.remove('linking-active'); } } }); }
         function selectChunk(chunkId) { selectedChunkId = chunkId; updateSelectedVisuals(); }
@@ -707,14 +798,27 @@
             const header = document.createElement('div'); header.className = 'chunk-header'; header.addEventListener('mousedown', onInteractionStart); header.addEventListener('touchstart', onInteractionStart, { passive: false });
             const headerTitle = document.createElement('span'); headerTitle.className = 'chunk-header-title';
             const actionsContainer = document.createElement('div'); actionsContainer.className = 'chunk-actions';
-            const aiBtn = document.createElement('button'); aiBtn.className = 'chunk-action-btn ai-chunk-btn'; aiBtn.title = 'AI Assistant'; aiBtn.innerHTML = ICON_AI_SPARKLE; aiBtn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); openAiModal(chunkData.id); });
-            const editBtn = document.createElement('button'); editBtn.className = 'chunk-action-btn edit-chunk-btn'; editBtn.title = 'Edit Chunk Properties'; editBtn.innerHTML = ICON_PENCIL_EDIT; editBtn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); openEditChunkModal(chunkData.id); });
+
+            const aiBtn = document.createElement('button'); aiBtn.className = 'chunk-action-btn ai-chunk-btn'; aiBtn.title = 'AI Assistant'; aiBtn.innerHTML = ICON_AI_SPARKLE;
+            const handleAiButtonAction = (e) => { e.preventDefault(); e.stopPropagation(); openAiModal(chunkData.id); };
+            aiBtn.addEventListener('click', handleAiButtonAction);
+            aiBtn.addEventListener('touchend', handleAiButtonAction);
+            
+            const editBtn = document.createElement('button'); editBtn.className = 'chunk-action-btn edit-chunk-btn'; editBtn.title = 'Edit Chunk Properties'; editBtn.innerHTML = ICON_PENCIL_EDIT;
+            const handleEditButtonAction = (e) => { e.preventDefault(); e.stopPropagation(); openEditChunkModal(chunkData.id); };
+            editBtn.addEventListener('click', handleEditButtonAction);
+            editBtn.addEventListener('touchend', handleEditButtonAction);
+
             const linkBtn = document.createElement('button'); linkBtn.className = 'chunk-action-btn link-chunk-btn'; linkBtn.innerHTML = ICON_LINK;
             const handleLinkButtonAction = (e) => { e.preventDefault(); e.stopPropagation(); const currentChunkData = chunksMap.get(chunkData.id); if (!currentChunkData) return; if (linkingMode && linkingSourceChunkId === currentChunkData.id) { cancelLinkingMode(false); } else if (currentChunkData.nextChunkIds && currentChunkData.nextChunkIds.length > 0) { openUnlinkModal(currentChunkData.id); } else { startLinkingMode(currentChunkData.id); } };
-            linkBtn.addEventListener('click', handleLinkButtonAction); linkBtn.addEventListener('touchend', handleLinkButtonAction);
+            linkBtn.addEventListener('click', handleLinkButtonAction);
+            linkBtn.addEventListener('touchend', handleLinkButtonAction);
+
             const deleteBtn = document.createElement('button'); deleteBtn.className = 'chunk-action-btn delete-chunk-btn'; deleteBtn.title = 'Delete Chunk'; deleteBtn.innerHTML = ICON_DELETE;
             const handleDeleteButtonAction = (e) => { e.preventDefault(); e.stopPropagation(); deleteChunk(chunkData.id); };
-            deleteBtn.addEventListener('click', handleDeleteButtonAction); deleteBtn.addEventListener('touchend', handleDeleteButtonAction);
+            deleteBtn.addEventListener('click', handleDeleteButtonAction);
+            deleteBtn.addEventListener('touchend', handleDeleteButtonAction);
+
             actionsContainer.appendChild(aiBtn); actionsContainer.appendChild(editBtn); actionsContainer.appendChild(linkBtn); actionsContainer.appendChild(deleteBtn);
             header.appendChild(headerTitle); header.appendChild(actionsContainer);
             const content = document.createElement('div'); content.className = 'chunk-content'; content.contentEditable = true; content.innerHTML = chunkData.text;
@@ -732,7 +836,6 @@
                 lastDeletedChunk = JSON.parse(JSON.stringify(chunks[chunkIndex]));
                 chunks.splice(chunkIndex, 1);
                 chunksMap.delete(chunkId);
-                // Also remove any incoming links to this chunk
                 chunks.forEach(c => {
                     if (c.nextChunkIds && c.nextChunkIds.includes(chunkId)) {
                         c.nextChunkIds = c.nextChunkIds.filter(id => id !== chunkId);
@@ -754,7 +857,26 @@
         // --- Linking Logic ---
         function startLinkingMode(sourceId) { linkingMode = true; linkingSourceChunkId = sourceId; document.body.classList.add('linking-mode'); selectedChunkId = sourceId; updateSelectedVisuals(); }
         function cancelLinkingMode(cancelledByDeselectAll = false) { linkingMode = false; const prevSourceId = linkingSourceChunkId; linkingSourceChunkId = null; document.body.classList.remove('linking-mode'); if (cancelledByDeselectAll) { selectedChunkId = null; } else if (prevSourceId) { selectChunk(prevSourceId); } updateSelectedVisuals(); }
-        function completeLink(sourceId, targetId) { const sourceChunk = chunksMap.get(sourceId); if (sourceChunk && targetId) { if (!sourceChunk.nextChunkIds) { sourceChunk.nextChunkIds = []; } if (!sourceChunk.nextChunkIds.includes(targetId)) { sourceChunk.nextChunkIds.push(targetId); } } const wasLinkingSource = linkingSourceChunkId; cancelLinkingMode(false); drawConnections(); if (wasLinkingSource) { selectChunk(wasLinkingSource); } updateSelectedVisuals(); }
+        
+        function completeLink(sourceId, targetId) {
+            const sourceChunk = chunksMap.get(sourceId);
+            if (sourceChunk && targetId) {
+                // Prevent linking to self
+                if (sourceId === targetId) return;
+
+                if (!sourceChunk.nextChunkIds) {
+                    sourceChunk.nextChunkIds = [];
+                }
+                // Add link if it doesn't exist already
+                if (!sourceChunk.nextChunkIds.includes(targetId)) {
+                    sourceChunk.nextChunkIds.push(targetId);
+                }
+            }
+            // Keep linking mode active
+            drawConnections();
+            updateSelectedVisuals();
+        }
+
         function getIntersectionPointWithRect(rect, internalPoint, externalPoint) { const p1 = internalPoint; const p2 = externalPoint; const dx = p2.x - p1.x; const dy = p2.y - p1.y; if (dx === 0 && dy === 0) return p1; let tMin = Infinity; let intersection = null; const rectRight = rect.x + rect.width; const rectBottom = rect.y + rect.height; if (dx !== 0) { const t = (rect.x - p1.x) / dx; if (t > 1e-6) { const y = p1.y + t * dy; if (y >= rect.y && y <= rectBottom) { if (t < tMin) { tMin = t; intersection = { x: rect.x, y: y }; } } } } if (dx !== 0) { const t = (rectRight - p1.x) / dx; if (t > 1e-6) { const y = p1.y + t * dy; if (y >= rect.y && y <= rectBottom) { if (t < tMin) { tMin = t; intersection = { x: rectRight, y: y }; } } } } if (dy !== 0) { const t = (rect.y - p1.y) / dy; if (t > 1e-6) { const x = p1.x + t * dx; if (x >= rect.x && x <= rectRight) { if (t < tMin) { tMin = t; intersection = { x: x, y: rect.y }; } } } } if (dy !== 0) { const t = (rectBottom - p1.y) / dy; if (t > 1e-6) { const x = p1.x + t * dx; if (x >= rect.x && x <= rectRight) { if (t < tMin) { tMin = t; intersection = { x: x, y: rectBottom }; } } } } return intersection || p1; }
         let svgDefsCreated = false;
         function ensureSvgDefs() { if (svgDefsCreated) return; const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs'); const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker'); marker.setAttribute('id', 'arrowhead'); marker.setAttribute('viewBox', '0 0 10 10'); marker.setAttribute('refX', '10'); marker.setAttribute('refY', '5'); marker.setAttribute('markerUnits', 'strokeWidth'); marker.setAttribute('markerWidth', '6'); marker.setAttribute('markerHeight', '5'); marker.setAttribute('orient', 'auto'); const path = document.createElementNS('http://www.w3.org/2000/svg', 'path'); path.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z'); path.classList.add('arrow-head'); marker.appendChild(path); defs.appendChild(marker); svgCanvas.appendChild(defs); svgDefsCreated = true; }
@@ -794,7 +916,51 @@
 
 
         // --- Interaction Logic (Drag, Resize, Pan, Zoom) ---
-        function onInteractionStart(e) { const isTouchEvent = e.type.startsWith('touch'); if (isTouchEvent && e.touches.length > 1) return; if (isTouchEvent) e.preventDefault(); const pointer = getPointerCoordinates(e); interactionStartX = pointer.x; interactionStartY = pointer.y; if (e.target.classList.contains('resize-handle')) { currentAction = 'resize'; resizingChunk = e.target.closest('.chorus-chunk'); if (!resizingChunk) { currentAction = null; return; } e.stopPropagation(); selectChunk(resizingChunk.id); highestZIndex++; resizingChunk.style.zIndex = String(highestZIndex); const chunkData = chunksMap.get(resizingChunk.id); if(chunkData) chunkData.zIndex = highestZIndex; startX = pointer.x; startY = pointer.y; startWidth = parseFloat(resizingChunk.style.width); startHeight = parseFloat(resizingChunk.style.height); } else if (e.target.closest('.chunk-header')) { if (e.target.closest('.chunk-action-btn')) return; currentAction = 'drag'; draggedChunk = e.target.closest('.chorus-chunk'); if (!draggedChunk) { currentAction = null; return; } e.stopPropagation(); selectChunk(draggedChunk.id); highestZIndex++; draggedChunk.style.zIndex = String(highestZIndex); const chunkData = chunksMap.get(draggedChunk.id); if(chunkData) chunkData.zIndex = highestZIndex; const worldPointer = screenToWorld(pointer.x, pointer.y); offsetX = worldPointer.x - parseFloat(draggedChunk.style.left); offsetY = worldPointer.y - parseFloat(draggedChunk.style.top); } if (currentAction === 'drag' || currentAction === 'resize') { document.addEventListener('mousemove', onInteractionMove); document.addEventListener('mouseup', onInteractionEnd); document.addEventListener('touchmove', onInteractionMove, { passive: false }); document.addEventListener('touchend', onInteractionEnd); } }
+        function onInteractionStart(e) {
+            if (linkingMode) return;
+
+            const isTouchEvent = e.type.startsWith('touch');
+            if (isTouchEvent && e.touches.length > 1) return;
+            if (isTouchEvent) e.preventDefault();
+            const pointer = getPointerCoordinates(e);
+            interactionStartX = pointer.x;
+            interactionStartY = pointer.y;
+            if (e.target.classList.contains('resize-handle')) {
+                currentAction = 'resize';
+                resizingChunk = e.target.closest('.chorus-chunk');
+                if (!resizingChunk) { currentAction = null; return; }
+                e.stopPropagation();
+                selectChunk(resizingChunk.id);
+                highestZIndex++;
+                resizingChunk.style.zIndex = String(highestZIndex);
+                const chunkData = chunksMap.get(resizingChunk.id);
+                if(chunkData) chunkData.zIndex = highestZIndex;
+                startX = pointer.x;
+                startY = pointer.y;
+                startWidth = parseFloat(resizingChunk.style.width);
+                startHeight = parseFloat(resizingChunk.style.height);
+            } else if (e.target.closest('.chunk-header')) {
+                if (e.target.closest('.chunk-action-btn')) return;
+                currentAction = 'drag';
+                draggedChunk = e.target.closest('.chorus-chunk');
+                if (!draggedChunk) { currentAction = null; return; }
+                e.stopPropagation();
+                selectChunk(draggedChunk.id);
+                highestZIndex++;
+                draggedChunk.style.zIndex = String(highestZIndex);
+                const chunkData = chunksMap.get(draggedChunk.id);
+                if(chunkData) chunkData.zIndex = highestZIndex;
+                const worldPointer = screenToWorld(pointer.x, pointer.y);
+                offsetX = worldPointer.x - parseFloat(draggedChunk.style.left);
+                offsetY = worldPointer.y - parseFloat(draggedChunk.style.top);
+            }
+            if (currentAction === 'drag' || currentAction === 'resize') {
+                document.addEventListener('mousemove', onInteractionMove);
+                document.addEventListener('mouseup', onInteractionEnd);
+                document.addEventListener('touchmove', onInteractionMove, { passive: false });
+                document.addEventListener('touchend', onInteractionEnd);
+            }
+        }
         let interactionMoveQueued = false;
         function onInteractionMove(e) { const isTouchEvent = e.type.startsWith('touch'); if (!currentAction) return; if (isTouchEvent) e.preventDefault(); if (interactionMoveQueued) return; interactionMoveQueued = true; requestAnimationFrame(() => { const pointer = getPointerCoordinates(e); if (currentAction === 'drag' && draggedChunk) { const worldPointer = screenToWorld(pointer.x, pointer.y); let newWorldX = worldPointer.x - offsetX; let newWorldY = worldPointer.y - offsetY; const canvasWorldWidth = noteCanvas.scrollWidth; const canvasWorldHeight = noteCanvas.scrollHeight; const chunkWidth = parseFloat(draggedChunk.style.width); const chunkHeight = parseFloat(draggedChunk.style.height); newWorldX = Math.max(0, Math.min(newWorldX, canvasWorldWidth - chunkWidth)); newWorldY = Math.max(0, Math.min(newWorldY, canvasWorldHeight - chunkHeight)); draggedChunk.style.left = newWorldX + 'px'; draggedChunk.style.top = newWorldY + 'px'; drawConnections(); } else if (currentAction === 'resize' && resizingChunk) { const deltaScreenX = pointer.x - startX; const deltaScreenY = pointer.y - startY; let newWidth = startWidth + (deltaScreenX / scale); let newHeight = startHeight + (deltaScreenY / scale); newWidth = Math.max(100, newWidth); newHeight = Math.max(80, newHeight); const chunkCurrentX = parseFloat(resizingChunk.style.left); const chunkCurrentY = parseFloat(resizingChunk.style.top); const canvasWorldWidth = noteCanvas.scrollWidth; const canvasWorldHeight = noteCanvas.scrollHeight; if (chunkCurrentX + newWidth > canvasWorldWidth) newWidth = canvasWorldWidth - chunkCurrentX; if (chunkCurrentY + newHeight > canvasWorldHeight) newHeight = canvasWorldHeight - chunkCurrentY; resizingChunk.style.width = newWidth + 'px'; resizingChunk.style.height = newHeight + 'px'; drawConnections(); } else if (currentAction === 'pan') { translateX = pointer.x - panStartX; translateY = pointer.y - panStartY; applyTransform(); } interactionMoveQueued = false; }); }
         function onInteractionEnd(e) { if (currentAction === 'drag' && draggedChunk) { const chunkData = chunksMap.get(draggedChunk.id); if (chunkData) { chunkData.x = parseFloat(draggedChunk.style.left); chunkData.y = parseFloat(draggedChunk.style.top); } draggedChunk = null; } else if (currentAction === 'resize' && resizingChunk) { const chunkData = chunksMap.get(resizingChunk.id); if (chunkData) { chunkData.width = parseFloat(resizingChunk.style.width); chunkData.height = parseFloat(resizingChunk.style.height); } resizingChunk = null; } else if (currentAction === 'pan') { noteCanvasContainer.classList.remove('panning'); } if (currentAction !== 'pinch-zoom') { currentAction = null; } document.removeEventListener('mousemove', onInteractionMove); document.removeEventListener('mouseup', onInteractionEnd); document.removeEventListener('touchmove', onInteractionMove); document.removeEventListener('touchend', onInteractionEnd); }
@@ -891,6 +1057,36 @@
         const originalButtonStates = {};
         function setButtonLoading(button, isLoading) { if (!button) { return; } const buttonId = button.id || `btn-${Math.random()}`; button.id = buttonId; if (isLoading) { if (!originalButtonStates[buttonId]) { originalButtonStates[buttonId] = button.innerHTML; } button.innerHTML = `<svg class="animate-spin h-5 w-5 spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`; button.classList.add('loading'); button.disabled = true; } else { if (originalButtonStates[buttonId] !== undefined) { button.innerHTML = originalButtonStates[buttonId]; delete originalButtonStates[buttonId]; } button.classList.remove('loading'); button.disabled = false; } }
 
+        function setupDropdowns() {
+            const dropdowns = document.querySelectorAll('.dropdown');
+
+            dropdowns.forEach(dropdown => {
+                const trigger = dropdown.querySelector('button');
+                const content = dropdown.querySelector('.dropdown-content');
+                
+                trigger.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    document.querySelectorAll('.dropdown-content.show').forEach(openContent => {
+                        if (openContent !== content) {
+                            openContent.classList.remove('show');
+                        }
+                    });
+                    content.classList.toggle('show');
+                });
+
+                content.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                });
+            });
+
+            window.addEventListener('click', () => {
+                document.querySelectorAll('.dropdown-content.show').forEach(openContent => {
+                    openContent.classList.remove('show');
+                });
+            });
+        }
+
+
         // --- Initialization Sequence ---
         function initializeApp() {
             document.getElementById('copyrightYear').textContent = new Date().getFullYear();
@@ -901,6 +1097,7 @@
             setupLayerControls(); 
             setupTemplateModal(); 
             populateAddChunkModal();
+            setupDropdowns();
             
             // Render the initial empty board
             renderBoard([]);
@@ -921,11 +1118,18 @@
             settingsBtn.addEventListener('click', () => showModal(settingsModal));
             helpBtn.addEventListener('click', () => { if(linkingMode) cancelLinkingMode(false); showModal(helpModal); });
             donateBtn.addEventListener('click', () => window.open('https://ko-fi.com/thorstenbecker', '_blank', 'noopener,noreferrer'));
-            exportTxtBtn.addEventListener('click', () => downloadFile(getCombinedTextForExport('txt'), 'chorus-export.txt', 'text/plain'));
-            exportMdBtn.addEventListener('click', () => downloadFile(getCombinedTextForExport('md'), 'chorus-export.md', 'text/markdown'));
+            exportTxtBtn.addEventListener('click', () => {
+                downloadFile(getCombinedTextForExport('txt'), 'chorus-export.txt', 'text/plain');
+                document.querySelectorAll('.dropdown-content.show').forEach(openContent => openContent.classList.remove('show'));
+            });
+            exportMdBtn.addEventListener('click', () => {
+                downloadFile(getCombinedTextForExport('md'), 'chorus-export.md', 'text/markdown');
+                document.querySelectorAll('.dropdown-content.show').forEach(openContent => openContent.classList.remove('show'));
+            });
             exportHtmlBtn.addEventListener('click', () => {
                 const content = `<html><head><title>CHORUS Export</title><style>.chunk{border:1px solid #ccc;padding:10px;margin-bottom:10px;border-radius:5px;}.meta{font-size:0.8em;color:gray;}</style></head><body>${getCombinedTextForExport('html')}</body></html>`;
                 downloadFile(content, 'chorus-export.html', 'text/html');
+                document.querySelectorAll('.dropdown-content.show').forEach(openContent => openContent.classList.remove('show'));
             });
 
 
