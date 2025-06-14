@@ -390,6 +390,10 @@
                         </a>
                     </p>
                 </div>
+                <div class="help-section">
+                    <h3>Copyright</h3>
+                    <p>&copy; <span id="copyrightYearHelp"></span> Thorsten Becker &bull; <a href="https://thorstenbecker.de" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">thorstenbecker.de</a></p>
+                </div>
             </div>
             <div class="mt-6 flex justify-end"><button id="closeHelpBtn" class="btn btn-primary">OK</button></div>
         </div>
@@ -1096,6 +1100,7 @@
         // --- Initialization Sequence ---
         function initializeApp() {
             document.getElementById('copyrightYear').textContent = new Date().getFullYear();
+            document.getElementById('copyrightYearHelp').textContent = new Date().getFullYear();
             
             // Load data and setup UI elements
             loadApiKey(); 
