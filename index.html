@@ -6,6 +6,8 @@
     <title>CHORUS AI: Strategist's Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Added Font Awesome for the heart icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -130,8 +132,14 @@
         .btn-secondary:hover:not(:disabled):not(.loading) { background-color: #d1d5db; }
         .btn-danger { background-color: #dc2626; color: white; }
         .btn-danger:hover:not(:disabled):not(.loading) { background-color: #b91c1c; }
-        .btn-donate { background-color: #ec4899; color: white; }
-        .btn-donate:hover:not(:disabled):not(.loading) { background-color: #db2777; }
+        
+        /* New class for the icon button to ensure consistent height */
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            padding: 0; /* Override default btn padding */
+        }
+
         #helpModal .modal-content, #messageModal .modal-content, #unlinkModal .modal-content { display: flex; flex-direction: column; max-height: 80vh; }
         #messageText, #help-scroll-content, #unlinkList { max-height: 60vh; overflow-y: auto; padding-right: 1rem;}
         body.linking-mode { cursor: crosshair; }
@@ -226,6 +234,10 @@
                 <button id="loadBtn" class="btn btn-secondary" title="Load from File (Ctrl/Cmd+O)">Load</button>
                 <button id="settingsBtn" class="btn btn-secondary" title="Settings">Settings</button>
                 <button id="helpBtn" class="btn btn-secondary" title="Help (?)">Help</button>
+                <!-- Changed donate button to use btn-icon class for consistent sizing -->
+                <button id="donateBtn" class="btn btn-primary btn-icon" title="Support the developer">
+                    <i class="fas fa-heart"></i>
+                </button>
             </div>
         </div>
 
@@ -1142,7 +1154,7 @@
                 document.querySelectorAll('.dropdown-content.show').forEach(openContent => openContent.classList.remove('show'));
             });
             exportMdBtn.addEventListener('click', () => {
-                downloadFile(getCombinedTextForExport('md'), 'chorus-export.md', 'text/markdown');
+                downloadFile(getCombinedTextForExport('md'), 'text/markdown');
                 document.querySelectorAll('.dropdown-content.show').forEach(openContent => openContent.classList.remove('show'));
             });
             exportHtmlBtn.addEventListener('click', () => {
