@@ -200,15 +200,15 @@
 
             <!-- Group 2 -->
             <div class="flex items-center flex-wrap justify-center gap-2">
-                 <button id="summarizeBtn" class="btn btn-secondary" title="Summarize the board with AI">AI Summary</button>
-                 <button id="viewToggleBtn" class="btn btn-secondary" title="Toggle Canvas/Timeline View">Timeline View</button>
+                 <button id="summarizeBtn" class="btn btn-secondary" title="Summarize the board with AI"><svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.25 10.5l-1.5-1.5 1.5-1.5 1.5 1.5-1.5 1.5ZM16.5 3.75l-1.5-1.5 1.5-1.5 1.5 1.5-1.5 1.5Z"></path></svg>Summarize</button>
+                 <button id="viewToggleBtn" class="btn btn-secondary" title="Toggle Canvas/Timeline View">Timeline</button>
                  <div class="dropdown">
                     <button class="btn btn-secondary">Layers</button>
                     <div id="layerControl" class="dropdown-content"></div>
                 </div>
-                <button id="zoomInBtn" class="btn btn-secondary" title="Zoom In (+/=)">+</button>
                 <button id="zoomOutBtn" class="btn btn-secondary" title="Zoom Out (-)">-</button>
                 <button id="zoomResetBtn" class="btn btn-secondary" title="Reset Zoom (0)">100%</button>
+                <button id="zoomInBtn" class="btn btn-secondary" title="Zoom In (+/=)">+</button>
             </div>
 
             <!-- Group 3 -->
@@ -568,11 +568,11 @@
                 renderTimelineView();
                 noteCanvasContainer.style.display = 'none';
                 timelineView.style.display = 'block';
-                viewToggleBtn.textContent = 'Canvas View';
+                viewToggleBtn.textContent = 'Canvas';
             } else {
                 noteCanvasContainer.style.display = 'block';
                 timelineView.style.display = 'none';
-                viewToggleBtn.textContent = 'Timeline View';
+                viewToggleBtn.textContent = 'Timeline';
                 applyTransform();
             }
         }
@@ -1110,8 +1110,33 @@
             undoDeleteBtn.addEventListener('click', () => { if (linkingMode) cancelLinkingMode(false); undoDeleteLastChunk(); });
             summarizeBtn.addEventListener('click', summarizeBoard);
             viewToggleBtn.addEventListener('click', toggleView);
-            zoomInBtn.addEventListener('click', () => { const centerRect = noteCanvasContainer.getBoundingClientRect(); const centerX = (centerRect.left || 0) + (centerRect.width || window.innerWidth) / 2; const centerY = (centerRect.top || 0) + (centerRect.height || window.innerHeight) / 2; const worldCenter = screenToWorld(centerX, centerY); let newScale = Math.min(MAX_SCALE, scale * 1.25); translateX = centerX - worldCenter.x * newScale; translateY = centerY - worldCenter.y * newScale; scale = newScale; applyTransform(); });
-            zoomOutBtn.addEventListener('click', () => { const centerRect = noteCanvasContainer.getBoundingClientRect(); const centerX = (centerRect.left || 0) + (centerRect.width || window.innerWidth) / 2; const centerY = (centerRect.top || 0) + (centerRect.height || window.innerHeight) / 2; const worldCenter = screenToWorld(centerX, centerY); let newScale = Math.max(MIN_SCALE, scale / 1.25); translateX = centerX - worldCenter.x * newScale; translateY = centerY - worldCenter.y * newScale; scale = newScale; applyTransform(); });
+            
+            // ZOOM FIX: Implement consistent centered zoom logic for buttons
+            zoomInBtn.addEventListener('click', () => {
+                const rect = noteCanvasContainer.getBoundingClientRect();
+                const centerXRelative = rect.width / 2;
+                const centerYRelative = rect.height / 2;
+                const worldXBeforeZoom = (centerXRelative - translateX) / scale;
+                const worldYBeforeZoom = (centerYRelative - translateY) / scale;
+                let newScale = Math.min(MAX_SCALE, scale * 1.25);
+                translateX = centerXRelative - worldXBeforeZoom * newScale;
+                translateY = centerYRelative - worldYBeforeZoom * newScale;
+                scale = newScale;
+                applyTransform();
+            });
+            zoomOutBtn.addEventListener('click', () => {
+                const rect = noteCanvasContainer.getBoundingClientRect();
+                const centerXRelative = rect.width / 2;
+                const centerYRelative = rect.height / 2;
+                const worldXBeforeZoom = (centerXRelative - translateX) / scale;
+                const worldYBeforeZoom = (centerYRelative - translateY) / scale;
+                let newScale = Math.max(MIN_SCALE, scale / 1.25);
+                translateX = centerXRelative - worldXBeforeZoom * newScale;
+                translateY = centerYRelative - worldYBeforeZoom * newScale;
+                scale = newScale;
+                applyTransform();
+            });
+
             zoomResetBtn.addEventListener('click', resetAndCenterView);
             saveBtn.addEventListener('click', saveDataToFile);
             loadBtn.addEventListener('click', () => { if(linkingMode) cancelLinkingMode(false); if (chunks.length > 0) { showMessage("Confirm Load", "Loading a new file will clear any unsaved changes on the current canvas. Are you sure you want to proceed?", [ { text: 'Cancel', class: 'btn-secondary' }, { text: 'Load File', class: 'btn-primary', action: () => fileLoadInput.click() } ]); } else { fileLoadInput.click(); } });
