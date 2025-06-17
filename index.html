@@ -29,6 +29,7 @@
             --link-arrow: #3b82f6;
             --canvas-grid-primary: rgba(208, 208, 208, 0.5);
             --canvas-bg: #fdfdfd;
+            --target-glow-color: rgba(255, 82, 82, 0.75);
         }
 
         body.theme-dark {
@@ -48,6 +49,7 @@
             --link-arrow: #60a5fa;
             --canvas-grid-primary: rgba(75, 85, 99, 0.5);
             --canvas-bg: #1f2937;
+            --target-glow-color: rgba(60, 179, 219, 0.75);
         }
 
         body.theme-blueprint {
@@ -68,6 +70,7 @@
             --link-arrow: #38bdf8;
             --canvas-grid-primary: rgba(56, 189, 248, 0.2);
             --canvas-bg: #0a2140;
+            --target-glow-color: rgba(56, 189, 248, 0.75);
         }
 
         body.theme-camo {
@@ -88,6 +91,7 @@
             --link-arrow: #5a6356;
             --canvas-grid-primary: rgba(61, 66, 57, 0.15);
             --canvas-bg: #e3e6df;
+            --target-glow-color: rgba(106, 127, 100, 0.85);
         }
 
         body.theme-wargaming {
@@ -108,10 +112,52 @@
             --link-arrow: #800000;
             --canvas-grid-primary: rgba(139, 69, 19, 0.2);
             --canvas-bg: #f5deb3; /* Wheat */
+            --target-glow-color: rgba(128, 0, 0, 0.75);
         }
         
+        body.theme-warhammer {
+            --font-main: 'Roboto Mono', monospace;
+            --bg-primary: #2a2b2e;
+            --bg-secondary: #1a1a1c;
+            --bg-modal: #3c3d40;
+            --text-primary: #d4c6ab;
+            --text-secondary: #9a8c78;
+            --border-primary: #8b0000;
+            --border-secondary: #5a1e1e;
+            --shadow-primary: 0 4px 8px rgba(0,0,0,0.5);
+            --btn-primary-bg: #8b0000;
+            --btn-primary-text: #f0e6d2;
+            --btn-secondary-bg: #4a4b4f;
+            --btn-secondary-text: #e0d5ba;
+            --link-stroke: #c4a56a;
+            --link-arrow: #c4a56a;
+            --canvas-grid-primary: rgba(196, 165, 106, 0.15);
+            --canvas-bg: #212123;
+            --target-glow-color: rgba(220, 20, 60, 0.75);
+        }
+        
+        body.theme-space-strategy {
+            --font-main: 'Inter', sans-serif;
+            --bg-primary: #0f172a;
+            --bg-secondary: #020617;
+            --bg-modal: #1e293b;
+            --text-primary: #cbd5e1;
+            --text-secondary: #94a3b8;
+            --border-primary: #334155;
+            --border-secondary: #475569;
+            --shadow-primary: 0 4px 10px rgba(0, 240, 255, 0.2);
+            --btn-primary-bg: #00f0ff;
+            --btn-primary-text: #020617;
+            --btn-secondary-bg: #334155;
+            --btn-secondary-text: #e2e8f0;
+            --link-stroke: #a252e8;
+            --link-arrow: #a252e8;
+            --canvas-grid-primary: rgba(0, 240, 255, 0.1);
+            --canvas-bg: #0d0f25;
+            --target-glow-color: rgba(0, 240, 255, 0.75);
+        }
 
-        /* --- THEME STYLES --- */
+        /* --- Global Styles --- */
         body {
             font-family: var(--font-main);
             background-color: var(--bg-secondary);
@@ -120,12 +166,12 @@
             overflow: hidden;
             transition: background-color 0.3s, color 0.3s;
         }
+        #appContainer { width: 100vw; height: 100vh; display: flex; flex-direction: column; }
         .toolbar {
             background-color: var(--bg-modal);
             border-bottom: 1px solid var(--border-secondary);
             box-shadow: var(--shadow-primary);
         }
-        #appContainer { width: 100vw; height: 100vh; display: flex; flex-direction: column; }
         #mainContent { position: relative; flex-grow: 1; overflow: hidden; }
         #noteCanvasContainer {
             position: absolute;
@@ -142,8 +188,44 @@
             background-color: transparent;
         }
 
+        /* --- Center Marker --- */
+        #centerMarker {
+            position: absolute;
+            top: 6000px; /* Center Y of 12000px canvas */
+            left: 8000px; /* Center X of 16000px canvas */
+            width: 64px;
+            height: 64px;
+            pointer-events: none;
+            z-index: 0;
+            transition: opacity 0.3s;
+            /* Transform is set by JS to center and apply inverse scale */
+        }
+        #centerMarker.hidden {
+            opacity: 0;
+        }
+        .target-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            border-style: solid;
+            border-color: var(--target-glow-color);
+        }
+        .ring-1 { width: 100%; height: 100%; border-width: 2px; opacity: 0.5; animation: pulse 2s infinite ease-in-out; }
+        .ring-2 { width: 60%; height: 60%; border-width: 1px; opacity: 0.8; animation: pulse 2s infinite ease-in-out 0.2s; }
+        .target-crosshair { position: absolute; background-color: var(--target-glow-color); }
+        .crosshair-h { top: 50%; left: 25%; width: 50%; height: 1px; transform: translateY(-50%); }
+        .crosshair-v { left: 50%; top: 25%; height: 50%; width: 1px; transform: translateX(-50%); }
+
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(0.95); box-shadow: 0 0 0 0 var(--target-glow-color); }
+            70% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 0 10px rgba(0,0,0,0); }
+            100% { transform: translate(-50%, -50%) scale(0.95); box-shadow: 0 0 0 0 rgba(0,0,0,0); }
+        }
+
+        /* --- SVG & Chunks --- */
         #svgCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
-        
         .chorus-chunk {
             position: absolute;
             background-color: var(--bg-primary);
@@ -208,7 +290,7 @@
             color: var(--text-primary);
         }
         .form-checkbox { width: auto; }
-        .form-select { appearance: none; } /* Better theme consistency */
+        .form-select { appearance: none; }
         .form-textarea { min-height: 120px; resize: vertical; }
         
         .btn { padding: 8px 12px; border-radius: 6px; font-weight: 500; cursor: pointer; transition: background-color 0.2s, color 0.2s, opacity 0.2s; margin-right: 8px; border: none; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; }
@@ -224,8 +306,7 @@
         .btn-danger:hover:not(:disabled):not(.loading) { background-color: #b91c1c; }
         .btn-icon { width: 40px; height: 40px; padding: 0; }
 
-        #helpModal .modal-content, #messageModal .modal-content, #unlinkModal .modal-content, #templatesModal .modal-content { display: flex; flex-direction: column; max-height: 80vh; }
-        #messageText, #help-scroll-content, #unlinkList, #templateList { max-height: 60vh; overflow-y: auto; padding-right: 1rem; }
+        .modal-scroll-content { max-height: 60vh; overflow-y: auto; padding-right: 1rem; }
         body.linking-mode { cursor: crosshair; }
         body.linking-mode .chorus-chunk:not(.linking-source-chunk):not(.hidden-by-layer):hover { outline: 2px dashed var(--link-stroke); }
         .close-button { color: var(--text-secondary); float: right; font-size: 28px; font-weight: bold; line-height: 1; }
@@ -247,10 +328,15 @@
         .dropdown-content button { display: block; width: 100%; text-align: left; padding: 8px 12px; color: var(--text-primary)}
         .dropdown-content button:hover { background-color: var(--bg-primary); }
         .dropdown-content.show { display: block; }
-        #layerControl { min-width: 220px; }
+        #layerControl, #chunkListDropdown { min-width: 220px; }
         #layerControl label { display: block; padding: 8px 12px; cursor: pointer; border-radius: 4px; color: var(--text-primary) }
         #layerControl label:hover { background-color: var(--bg-primary); }
         #layerControl input { margin-right: 10px; }
+        #themeSelector button {
+             display: block; width: 100%; text-align: left; padding: 8px 12px;
+             border: none; background: none; cursor: pointer; border-radius: 4px;
+        }
+        #themeSelector button:hover { background-color: var(--bg-secondary); }
         
         /* Timeline View */
         #timelineView { display: none; padding: 2rem; overflow-y: auto; height: 100%; }
@@ -287,8 +373,12 @@
                     <button class="btn btn-secondary">Layers</button>
                     <div id="layerControl" class="dropdown-content"></div>
                 </div>
-                <button id="centerOnSelectionBtn" class="btn btn-secondary" title="Center on Selection (C)" disabled>Center</button>
-                <button id="centerOnLastBtn" class="btn btn-secondary" title="Center on Last Added (L)" disabled>Last</button>
+                <div class="dropdown">
+                    <button id="chunkListBtn" class="btn btn-secondary" title="Find a chunk">Find</button>
+                    <div id="chunkListDropdown" class="dropdown-content max-h-72 overflow-y-auto">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
                 <button id="zoomOutBtn" class="btn btn-secondary" title="Zoom Out (-)">-</button>
                 <button id="zoomResetBtn" class="btn btn-secondary" title="Reset Zoom (0)">100%</button>
                 <button id="zoomInBtn" class="btn btn-secondary" title="Zoom In (+/=)">+</button>
@@ -303,19 +393,8 @@
                         <button id="exportTxtBtn" class="btn btn-secondary w-full">TXT</button>
                         <button id="exportMdBtn" class="btn btn-secondary w-full">Markdown</button>
                         <button id="exportHtmlBtn" class="btn btn-secondary w-full">HTML</button>
-                        <button id="exportJsonBtn" class="btn btn-secondary w-full">JSON</button> <!-- NEW -->
-                        <button id="exportCsvBtn" class="btn btn-secondary w-full">CSV</button> <!-- NEW -->
-                    </div>
-                </div>
-                <!-- NEW: Theme Selector Dropdown -->
-                <div class="dropdown">
-                    <button class="btn btn-secondary" title="Change Theme">Theme</button>
-                    <div id="themeSelector" class="dropdown-content">
-                        <button data-theme="default" class="theme-btn btn btn-secondary w-full">Default</button>
-                        <button data-theme="theme-dark" class="theme-btn btn btn-secondary w-full">Night Ops</button>
-                        <button data-theme="theme-blueprint" class="theme-btn btn btn-secondary w-full">Blueprint</button>
-                        <button data-theme="theme-camo" class="theme-btn btn btn-secondary w-full">Camouflage</button>
-                        <button data-theme="theme-wargaming" class="theme-btn btn btn-secondary w-full">Wargaming</button>
+                        <button id="exportJsonBtn" class="btn btn-secondary w-full">JSON</button>
+                        <button id="exportCsvBtn" class="btn btn-secondary w-full">CSV</button>
                     </div>
                 </div>
                 <button id="saveBtn" class="btn btn-secondary" title="Save to File (Ctrl/Cmd+S)">Save</button>
@@ -334,9 +413,12 @@
                 <div id="transformContainer">
                     <div id="noteCanvas">
                         <svg id="svgCanvas"></svg>
-                        <div id="centerMarker" class="hidden absolute top-[6000px] left-[8000px] -translate-x-1/2 -translate-y-1/2 w-72 h-72 pointer-events-none z-0">
-                             <div class="w-full absolute top-1/2 left-0 -translate-y-1/2 border-t-2 border-dashed border-red-500/75"></div>
-                             <div class="h-full absolute left-1/2 top-0 -translate-x-1/2 border-l-2 border-dashed border-red-500/75"></div>
+                        <!-- Center marker is positioned on the canvas -->
+                        <div id="centerMarker" class="hidden">
+                            <div class="target-ring ring-1"></div>
+                            <div class="target-ring ring-2"></div>
+                            <div class="target-crosshair crosshair-h"></div>
+                            <div class="target-crosshair crosshair-v"></div>
                         </div>
                     </div>
                 </div>
@@ -406,19 +488,18 @@
             <span class="close-button" onclick="this.parentElement.parentElement.classList.add('hidden')">&times;</span>
             <h2>Manage Relationships</h2>
             <p class="text-sm mb-4">Edit or remove outgoing relationships from this chunk.</p>
-            <div id="unlinkList" class="space-y-2"></div>
+            <div id="unlinkList" class="space-y-2 modal-scroll-content"></div>
             <div class="mt-6 flex justify-end">
                 <button id="closeUnlinkModalBtn" class="btn btn-primary">Done</button>
             </div>
         </div>
     </div>
-    <!-- MODIFIED: Template Modal Content -->
     <div id="templatesModal" class="modal hidden">
         <div class="modal-content">
             <span class="close-button" onclick="this.parentElement.parentElement.classList.add('hidden')">&times;</span>
             <h2>Load a Template</h2>
             <p class="text-sm mb-4">Loading a template will clear the current canvas.</p>
-            <div id="templateList" class="space-y-2 max-h-[60vh] overflow-y-auto overflow-x-hidden pr-4"></div>
+            <div id="templateList" class="space-y-2 modal-scroll-content"></div>
             <hr class="my-4 border-t border-[var(--border-secondary)]">
             <h3 class="font-semibold text-lg mb-2">Custom Templates</h3>
             <p class="text-sm mb-3">Save the current board as a reusable template, or load one you've previously saved.</p>
@@ -449,6 +530,17 @@
                         <input type="checkbox" id="centerMarkerToggle" class="form-checkbox">
                         <span>Show Center Marker</span>
                     </label>
+
+                    <h3 class="font-semibold text-lg mb-2 mt-6">Visual Theme</h3>
+                    <div id="themeSelector" class="space-y-1">
+                        <button data-theme="default" class="theme-btn">Default</button>
+                        <button data-theme="theme-dark" class="theme-btn">Night Ops</button>
+                        <button data-theme="theme-blueprint" class="theme-btn">Blueprint</button>
+                        <button data-theme="theme-camo" class="theme-btn">Camouflage</button>
+                        <button data-theme="theme-wargaming" class="theme-btn">Wargaming</button>
+                        <button data-theme="theme-warhammer" class="theme-btn">Grim Dark</button>
+                        <button data-theme="theme-space-strategy" class="theme-btn">Space Strategy</button>
+                    </div>
 
                 </div>
                 <div>
@@ -486,7 +578,7 @@
         <div class="modal-content">
             <span id="closeHelpModalSpan" class="close-button">&times;</span>
             <h2>CHORUS Quick Help</h2>
-            <div id="help-scroll-content">
+            <div id="help-scroll-content" class="modal-scroll-content">
                 <div class="help-section">
                     <h3>What is CHORUS Strategist's Edition?</h3>
                     <p class="mb-2">This is a specialized version of the CHORUS thinking tool, adapted for strategic planning, wargaming, and competitive analysis. It replaces abstract concepts with a practical vocabulary for strategists, allowing you to map out complex operational environments.</p>
@@ -495,9 +587,9 @@
                 <div class="help-section">
                     <h3>✨ New Features</h3>
                     <ul>
+                        <li><strong>New Themes:</strong> Grim Dark, Space Strategy, and more themes available in Settings.</li>
+                        <li><strong>New Templates:</strong> Added 4X Strategy template.</li>
                         <li><strong>Custom Templates:</strong> Save your current board as a reusable template and load it later from the 'Templates' modal.</li>
-                        <li><strong>New Export Formats:</strong> Export your board to JSON or CSV for use in other tools from the 'Export' menu.</li>
-                        <li><strong>New Game Design Templates:</strong> Added templates for Game Design and Tactical Analysis.</li>
                         <li><strong>Relationship Notes:</strong> Add short text labels to your connection lines to add specific context.</li>
                         <li><strong>Layer Control:</strong> Use the 'Layers' dropdown to show or hide chunks based on their color tag.</li>
                         <li><strong>Timeline View:</strong> Switch to a chronological 'Timeline View' to see your plan unfold sequentially.</li>
@@ -511,7 +603,7 @@
                 <div class="help-section"><h3>Color Tags / Layers</h3><ul id="helpColors"></ul></div>
                 <div class="help-section">
                     <h3>Support the Developer</h3>
-                    <p>If you find this app helpful, please consider supporting my work by donating. It helps me dedicate more time to improving it and creating new tools.</p>
+                    <p>If you find this app helpful, please consider supporting my work. It helps me dedicate more time to improving it and creating new tools.</p>
                     <p class="mt-2">
                         <a href="https://ko-fi.com/thorstenbecker" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline font-semibold">
                            Donate via Ko-fi
@@ -529,10 +621,24 @@
     <div id="messageModal" class="modal hidden">
         <div class="modal-content max-w-lg">
             <h2 id="messageTitle" class="text-xl font-semibold mb-3">Message</h2>
-            <div id="messageText" class="mb-4 text-sm"></div>
+            <div id="messageText" class="mb-4 text-sm modal-scroll-content"></div>
             <div id="messageButtons" class="flex justify-end"></div>
         </div>
     </div>
+
+    <!-- NEW: Support/Donate Modal -->
+    <div id="supportModal" class="modal hidden">
+        <div class="modal-content">
+             <span class="close-button" onclick="this.parentElement.parentElement.classList.add('hidden')">&times;</span>
+             <h2 class="text-xl font-semibold mb-3">Support CHORUS Strategy</h2>
+             <p class="mb-4">Thank you for considering a donation! This project is developed and maintained by an independent creator. Your support helps keep the app free and growing.</p>
+             <p>You can support the project here: <a href="https://ko-fi.com/thorstenbecker" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline font-semibold">Ko-fi.com/thorstenbecker</a></p>
+             <div class="mt-6 flex justify-end">
+                <button class="btn btn-primary" onclick="this.closest('.modal').classList.add('hidden')">Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- File inputs for loading data and templates -->
     <input type="file" id="fileLoadInput" class="hidden" accept=".json,application/json">
     <input type="file" id="customTemplateLoadInput" class="hidden" accept=".json,application/json">
@@ -560,12 +666,14 @@
         const ICON_AI_SPARKLE = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.25 10.5l-1.5-1.5 1.5-1.5 1.5 1.5-1.5 1.5ZM16.5 3.75l-1.5-1.5 1.5-1.5 1.5 1.5-1.5 1.5Z" /></svg>`;
 
         // --- DOM Elements Cache ---
-        const noteCanvasContainer = document.getElementById('noteCanvasContainer'); const mainContent = document.getElementById('mainContent'); const timelineView = document.getElementById('timelineView'); const viewToggleBtn = document.getElementById('viewToggleBtn'); const transformContainer = document.getElementById('transformContainer'); const svgCanvas = document.getElementById('svgCanvas'); const noteCanvas = document.getElementById('noteCanvas'); const addChunkBtn = document.getElementById('addChunkBtn'); const templatesBtn = document.getElementById('templatesBtn'); const templatesModal = document.getElementById('templatesModal'); const templateList = document.getElementById('templateList'); const saveAsTemplateBtn = document.getElementById('saveAsTemplateBtn'); const loadCustomTemplateBtn = document.getElementById('loadCustomTemplateBtn'); const customTemplateLoadInput = document.getElementById('customTemplateLoadInput'); const layerControl = document.getElementById('layerControl'); const clearCanvasBtn = document.getElementById('clearCanvasBtn'); const undoDeleteBtn = document.getElementById('undoDeleteBtn'); const chunkCountDisplay = document.getElementById('chunkCountDisplay'); const zoomInBtn = document.getElementById('zoomInBtn'); const zoomOutBtn = document.getElementById('zoomOutBtn'); const zoomResetBtn = document.getElementById('zoomResetBtn'); const centerOnSelectionBtn = document.getElementById('centerOnSelectionBtn'); const centerOnLastBtn = document.getElementById('centerOnLastBtn'); const addChunkModal = document.getElementById('addChunkModal'); const chunkTypeSelect = document.getElementById('chunkTypeSelect'); const chunkShapeSelect = document.getElementById('chunkShapeSelect'); const chunkColorSelect = document.getElementById('chunkColorSelect'); const confirmAddChunkBtn = document.getElementById('confirmAddChunkBtn'); const cancelAddChunkBtn = document.getElementById('cancelAddChunkBtn'); const editChunkModal = document.getElementById('editChunkModal'); const editingChunkIdInput = document.getElementById('editingChunkId'); const editChunkTypeSelect = document.getElementById('editChunkTypeSelect'); const editChunkShapeSelect = document.getElementById('editChunkShapeSelect'); const editChunkColorSelect = document.getElementById('editChunkColorSelect'); const confirmEditChunkBtn = document.getElementById('confirmEditChunkBtn'); const cancelEditChunkBtn = document.getElementById('cancelEditChunkBtn'); const summarizeBtn = document.getElementById('summarizeBtn'); const settingsBtn = document.getElementById('settingsBtn'); const settingsModal = document.getElementById('settingsModal'); const geminiApiKeyInput = document.getElementById('geminiApiKeyInput'); const saveSettingsBtn = document.getElementById('saveSettingsBtn'); const cancelSettingsBtn = document.getElementById('cancelSettingsBtn'); const customTypesContainer = document.getElementById('customTypesContainer'); const addCustomTypeForm = document.getElementById('addCustomTypeForm'); const customTypeTagInput = document.getElementById('customTypeTag'); const customTypeDescInput = document.getElementById('customTypeDesc'); const aiActionModal = document.getElementById('aiActionModal'); const aiPromptTextarea = document.getElementById('aiPromptTextarea'); const aiActionGenerateBtn = document.getElementById('aiActionGenerateBtn'); const aiActionSuggestNextBtn = document.getElementById('aiActionSuggestNextBtn'); const cancelAiActionBtn = document.getElementById('cancelAiActionBtn'); const closeAiActionModalBtn = document.getElementById('closeAiActionModalBtn'); const closeSettingsModalBtn = document.getElementById('closeSettingsModalBtn'); const helpBtn = document.getElementById('helpBtn'); const helpModal = document.getElementById('helpModal'); const closeHelpBtn = document.getElementById('closeHelpBtn'); const closeHelpModalSpan = document.getElementById('closeHelpModalSpan'); const saveBtn = document.getElementById('saveBtn'); const loadBtn = document.getElementById('loadBtn'); const fileLoadInput = document.getElementById('fileLoadInput'); const messageModal = document.getElementById('messageModal'); const messageTitle = document.getElementById('messageTitle'); const messageText = document.getElementById('messageText'); const messageButtons = document.getElementById('messageButtons');
+        const noteCanvasContainer = document.getElementById('noteCanvasContainer'); const mainContent = document.getElementById('mainContent'); const timelineView = document.getElementById('timelineView'); const viewToggleBtn = document.getElementById('viewToggleBtn'); const transformContainer = document.getElementById('transformContainer'); const svgCanvas = document.getElementById('svgCanvas'); const noteCanvas = document.getElementById('noteCanvas'); const addChunkBtn = document.getElementById('addChunkBtn'); const templatesBtn = document.getElementById('templatesBtn'); const templatesModal = document.getElementById('templatesModal'); const templateList = document.getElementById('templateList'); const saveAsTemplateBtn = document.getElementById('saveAsTemplateBtn'); const loadCustomTemplateBtn = document.getElementById('loadCustomTemplateBtn'); const customTemplateLoadInput = document.getElementById('customTemplateLoadInput'); const layerControl = document.getElementById('layerControl'); const clearCanvasBtn = document.getElementById('clearCanvasBtn'); const undoDeleteBtn = document.getElementById('undoDeleteBtn'); const chunkCountDisplay = document.getElementById('chunkCountDisplay'); const zoomInBtn = document.getElementById('zoomInBtn'); const zoomOutBtn = document.getElementById('zoomOutBtn'); const zoomResetBtn = document.getElementById('zoomResetBtn'); const addChunkModal = document.getElementById('addChunkModal'); const chunkTypeSelect = document.getElementById('chunkTypeSelect'); const chunkShapeSelect = document.getElementById('chunkShapeSelect'); const chunkColorSelect = document.getElementById('chunkColorSelect'); const confirmAddChunkBtn = document.getElementById('confirmAddChunkBtn'); const cancelAddChunkBtn = document.getElementById('cancelAddChunkBtn'); const editChunkModal = document.getElementById('editChunkModal'); const editingChunkIdInput = document.getElementById('editingChunkId'); const editChunkTypeSelect = document.getElementById('editChunkTypeSelect'); const editChunkShapeSelect = document.getElementById('editChunkShapeSelect'); const editChunkColorSelect = document.getElementById('editChunkColorSelect'); const confirmEditChunkBtn = document.getElementById('confirmEditChunkBtn'); const cancelEditChunkBtn = document.getElementById('cancelEditChunkBtn'); const summarizeBtn = document.getElementById('summarizeBtn'); const settingsBtn = document.getElementById('settingsBtn'); const settingsModal = document.getElementById('settingsModal'); const geminiApiKeyInput = document.getElementById('geminiApiKeyInput'); const saveSettingsBtn = document.getElementById('saveSettingsBtn'); const cancelSettingsBtn = document.getElementById('cancelSettingsBtn'); const customTypesContainer = document.getElementById('customTypesContainer'); const addCustomTypeForm = document.getElementById('addCustomTypeForm'); const customTypeTagInput = document.getElementById('customTypeTag'); const customTypeDescInput = document.getElementById('customTypeDesc'); const aiActionModal = document.getElementById('aiActionModal'); const aiPromptTextarea = document.getElementById('aiPromptTextarea'); const aiActionGenerateBtn = document.getElementById('aiActionGenerateBtn'); const aiActionSuggestNextBtn = document.getElementById('aiActionSuggestNextBtn'); const cancelAiActionBtn = document.getElementById('cancelAiActionBtn'); const closeAiActionModalBtn = document.getElementById('closeAiActionModalBtn'); const closeSettingsModalBtn = document.getElementById('closeSettingsModalBtn'); const helpBtn = document.getElementById('helpBtn'); const helpModal = document.getElementById('helpModal'); const closeHelpBtn = document.getElementById('closeHelpBtn'); const closeHelpModalSpan = document.getElementById('closeHelpModalSpan'); const saveBtn = document.getElementById('saveBtn'); const loadBtn = document.getElementById('loadBtn'); const fileLoadInput = document.getElementById('fileLoadInput'); const messageModal = document.getElementById('messageModal'); const messageTitle = document.getElementById('messageTitle'); const messageText = document.getElementById('messageText'); const messageButtons = document.getElementById('messageButtons');
         const unlinkModal = document.getElementById('unlinkModal'); const unlinkList = document.getElementById('unlinkList'); const closeUnlinkModalBtn = document.getElementById('closeUnlinkModalBtn');
         const exportTxtBtn = document.getElementById('exportTxtBtn'); const exportMdBtn = document.getElementById('exportMdBtn'); const exportHtmlBtn = document.getElementById('exportHtmlBtn'); const exportJsonBtn = document.getElementById('exportJsonBtn'); const exportCsvBtn = document.getElementById('exportCsvBtn');
         const donateBtn = document.getElementById('donateBtn');
+        const supportModal = document.getElementById('supportModal');
         const linkEditModal = document.getElementById('linkEditModal'); const linkEditTitle = document.getElementById('linkEditTitle'); const linkTypeSelect = document.getElementById('linkTypeSelect'); const linkLabelInput = document.getElementById('linkLabelInput'); const cancelLinkEditBtn = document.getElementById('cancelLinkEditBtn'); const confirmLinkEditBtn = document.getElementById('confirmLinkEditBtn'); const linkSourceIdInput = document.getElementById('linkSourceId'); const linkTargetIdInput = document.getElementById('linkTargetId');
         const gridToggle = document.getElementById('gridToggle'); const centerMarkerToggle = document.getElementById('centerMarkerToggle'); const centerMarker = document.getElementById('centerMarker');
+        const chunkListDropdown = document.getElementById('chunkListDropdown');
 
         // --- App State ---
         let currentView = 'canvas'; let chunkTypes = {}; let allChunkTypesList = []; let layerVisibility = {}; let chunks = []; let chunksMap = new Map();
@@ -574,13 +682,14 @@
         let currentAction = null; let panStartX = 0; let panStartY = 0; let initialPinchDistance = null; let transformUpdateQueued = false;
         let showGrid = true; let showCenterMarker = false;
         
-        // --- MODIFIED: Added new templates ---
+        // --- Added new templates and themes ---
         const STRATEGIC_TEMPLATES = {
             swot: { name: "SWOT Analysis", description: "Analyze Strengths, Weaknesses, Opportunities, and Threats.", chunks: [ { x: 100, y: 100, w: 250, h: 150, type: "#asset", shape: "Shield", color: "Blue", text: "Strengths" }, { x: 400, y: 100, w: 250, h: 150, type: "#threat", shape: "Skull", color: "Red", text: "Weaknesses" }, { x: 100, y: 300, w: 250, h: 150, type: "#asset", shape: "Flag", color: "Green", text: "Opportunities" }, { x: 400, y: 300, w: 250, h: 150, type: "#threat", shape: "Crossed Swords", color: "Red", text: "Threats" } ], links: [] },
             ooda: { name: "OODA Loop", description: "A cycle for decision making: Observe, Orient, Decide, Act.", chunks: [ { id: "o1", x: 350, y: 100, w: 250, h: 120, type: "#intel", shape: "Eye", color: "Purple", text: "Observe" }, { id: "o2", x: 650, y: 300, w: 250, h: 120, type: "#decision", shape: "Triangle", color: "Yellow", text: "Orient" }, { id: "o3", x: 350, y: 500, w: 250, h: 120, type: "#decision", shape: "Diamond", color: "Blue", text: "Decide" }, { id: "o4", x: 50,  y: 300, w: 250, h: 120, type: "#action", shape: "Bolt", color: "Red", text: "Act" } ], links: [{ from: "o1", to: "o2", type: "enables" }, { from: "o2", to: "o3", type: "enables" }, { from: "o3", to: "o4", type: "enables" }, { from: "o4", to: "o1", type: "informs", label: "Feedback" }] },
             coa: { name: "COA Development", description: "Develop and compare multiple Courses of Action.", chunks: [ { id: "c1", x: 500, y: 100, w: 300, h: 120, type: "#objective", shape: "Target", color: "Purple", text: "Primary Objective" }, { id: "c2", x: 200, y: 300, w: 280, h: 150, type: "#action", shape: "Square", color: "Blue", text: "Course of Action 1" }, { id: "c3", x: 200, y: 500, w: 280, h: 150, type: "#support", shape: "Square", color: "Blue", text: "Pros & Cons for COA 1" }, { id: "c4", x: 800, y: 300, w: 280, h: 150, type: "#action", shape: "Square", color: "Yellow", text: "Course of Action 2" }, { id: "c5", x: 800, y: 500, w: 280, h: 150, type: "#support", shape: "Square", color: "Yellow", text: "Pros & Cons for COA 2" } ], links: [{ from: "c1", to: "c2", type: "enables" }, { from: "c2", to: "c3", type: "supports" }, { from: "c1", to: "c4", type: "enables" }, { from: "c4", to: "c5", type: "supports" }] },
             gameDesign: { name: "Game Design Doc", description: "Outline the core pillars of a video game concept.", chunks: [ { id:"gd1", x: 400, y: 100, w: 300, h: 120, type: "#objective", shape: "Diamond", color: "Purple", text: "Core Game Loop" }, { id:"gd2", x: 100, y: 300, w: 250, h: 150, type: "#asset", shape: "Circle", color: "Blue", text: "Player Fantasy" }, { id:"gd3", x: 450, y: 300, w: 250, h: 150, type: "#action", shape: "Bolt", color: "Green", text: "Key Mechanics" }, { id:"gd4", x: 800, y: 300, w: 250, h: 150, type: "#threat", shape: "Skull", color: "Red", text: "Risks & Challenges" }, { id:"gd5", x: 400, y: 500, w: 300, h: 120, type: "#support", shape: "Square", color: "Grey", text: "Art Style & Theme" } ], links: [ {from: "gd1", to: "gd2", type: "enables"}, {from: "gd1", to: "gd3", type: "enables"}, {from: "gd3", to: "gd4", type: "counters"}, {from: "gd1", to: "gd5", type: "supports"} ]},
-            tactics: { name: "Tactical Plan", description: "A framework for a tactical engagement (e.g., chess, wargame).", chunks: [ {id:"t1", x: 500, y: 100, w: 250, h: 120, type: "#objective", shape: "Target", color: "Purple", text: "Winning Condition" }, {id:"t2", x: 200, y: 300, w: 250, h: 150, type: "#asset", shape: "Shield", color: "Blue", text: "My Key Strengths" }, {id:"t3", x: 800, y: 300, w: 250, h: 150, type: "#threat", shape: "Crossed Swords", color: "Red", text: "Opponent's Plan" }, {id:"t4", x: 500, y: 500, w: 250, h: 150, type: "#action", shape: "Triangle", color: "Green", text: "My Counter-Moves" } ], links: [ {from: "t1", to: "t2", type: "supports"}, {from: "t3", to: "t4", type: "counters"}, {from: "t2", to: "t4", type: "enables"} ]}
+            tactics: { name: "Tactical Plan", description: "A framework for a tactical engagement (e.g., chess, wargame).", chunks: [ {id:"t1", x: 500, y: 100, w: 250, h: 120, type: "#objective", shape: "Target", color: "Purple", text: "Winning Condition" }, {id:"t2", x: 200, y: 300, w: 250, h: 150, type: "#asset", shape: "Shield", color: "Blue", text: "My Key Strengths" }, {id:"t3", x: 800, y: 300, w: 250, h: 150, type: "#threat", shape: "Crossed Swords", color: "Red", text: "Opponent's Plan" }, {id:"t4", x: 500, y: 500, w: 250, h: 150, type: "#action", shape: "Triangle", color: "Green", text: "My Counter-Moves" } ], links: [ {from: "t1", to: "t2", type: "supports"}, {from: "t3", to: "t4", type: "counters"}, {from: "t2", to: "t4", type: "enables"} ]},
+            four_x_strategy: { name: "4X Strategy", description: "A template for eXplore, eXpand, eXploit, eXterminate games.", chunks: [ { id: "x1", x: 100, y: 300, w: 250, h: 150, type: "#action", shape: "Triangle", color: "Blue", text: "eXplore: Scout the unknown" }, { id: "x2", x: 400, y: 300, w: 250, h: 150, type: "#action", shape: "Square", color: "Green", text: "eXpand: Settle new territory" }, { id: "x3", x: 700, y: 300, w: 250, h: 150, type: "#action", shape: "Diamond", color: "Yellow", text: "eXploit: Develop resources" }, { id: "x4", x: 1000, y: 300, w: 250, h: 150, type: "#action", shape: "Bolt", color: "Red", text: "eXterminate: Overcome rivals" }, { id: "x5", x: 550, y: 100, w: 300, h: 120, type: "#objective", shape: "Target", color: "Purple", text: "Galactic Domination" } ], links: [ { from: "x1", to: "x2", type: "enables" }, { from: "x2", to: "x3", type: "enables" }, { from: "x3", to: "x4", type: "enables" }, { from: "x5", to: "x1", type: "supports" }, { from: "x5", to: "x4", type: "supports" }] }
         };
 
         // --- Utility & Setup Functions ---
@@ -628,11 +737,13 @@
         
         // --- Theme Management ---
         function applyTheme(theme) {
-            document.body.classList.remove('theme-dark', 'theme-blueprint', 'theme-camo', 'theme-wargaming');
+            document.body.classList.remove('theme-dark', 'theme-blueprint', 'theme-camo', 'theme-wargaming', 'theme-warhammer', 'theme-space-strategy');
             if (theme && theme !== 'default') {
                 document.body.classList.add(theme);
             }
+            // Redraw connections and grid to apply new theme colors
             drawConnections();
+            updateGrid();
         }
 
         function saveTheme(theme) {
@@ -652,9 +763,6 @@
                     const theme = themeBtn.dataset.theme;
                     applyTheme(theme);
                     saveTheme(theme);
-                     document.querySelectorAll('.dropdown-content.show').forEach(openContent => {
-                        openContent.classList.remove('show');
-                    });
                 }
             });
         }
@@ -665,8 +773,6 @@
                 <li><code>Ctrl/Cmd + O</code>: Load</li>
                 <li><code>Ctrl/Cmd + Z</code>: Undo Delete</li>
                 <li><code>A</code>: Add a new chunk</li>
-                <li><code>C</code>: Center on selected chunk</li>
-                <li><code>L</code>: Center on last added chunk</li>
                 <li><code>Esc</code>: Close modals / Deselect</li>
                 <li><code>Delete</code> / <code>Backspace</code>: Delete selected</li>`;
             document.getElementById('helpLinkTypes').innerHTML = LINK_TYPES.map(l => `<li><strong>${l.label}</strong>: A line with a <code>${l.style}</code> style.</li>`).join('');
@@ -846,7 +952,6 @@
             drawConnections();
         }
 
-        // MODIFIED: setupTemplateModal to include new templates
         function setupTemplateModal() {
             templateList.innerHTML = '';
             for (const key in STRATEGIC_TEMPLATES) {
@@ -873,8 +978,8 @@
             template.chunks.forEach(chunkTmpl => {
                 minX = Math.min(minX, chunkTmpl.x);
                 minY = Math.min(minY, chunkTmpl.y);
-                maxX = Math.max(maxX, chunkTmpl.x + chunkTmpl.w);
-                maxY = Math.max(maxY, chunkTmpl.y + chunkTmpl.h);
+                maxX = Math.max(maxX, chunkTmpl.x + (chunkTmpl.w || 250));
+                maxY = Math.max(maxY, chunkTmpl.y + (chunkTmpl.h || 150));
             });
             const templateWidth = maxX - minX;
             const templateHeight = maxY - minY;
@@ -903,7 +1008,7 @@
                     text: chunkTmpl.text || '...',
                     x: chunkTmpl.x + offsetX,
                     y: chunkTmpl.y + offsetY,
-                    width: chunkTmpl.w, height: chunkTmpl.h,
+                    width: chunkTmpl.w || 250, height: chunkTmpl.h || 150,
                     zIndex: ++highestZIndex,
                     links: []
                 };
@@ -936,6 +1041,10 @@
                     svgCanvas.setAttribute('height', String(noteCanvas.scrollHeight));
                     drawConnections();
                     updateGrid();
+                    // Keep center marker at a constant size relative to the screen
+                    if (centerMarker) {
+                        centerMarker.style.transform = `translate(-50%, -50%) scale(${1 / scale})`;
+                    }
                     transformUpdateQueued = false;
                 });
             }
@@ -1101,7 +1210,6 @@
         function selectChunk(chunkId) { 
             selectedChunkId = chunkId; 
             updateSelectedVisuals();
-            centerOnSelectionBtn.disabled = false;
         }
         function deselectAllChunks() { 
             const wasLinking = linkingMode; 
@@ -1112,7 +1220,6 @@
             if (!wasLinking) { 
                 updateSelectedVisuals(); 
             }
-            centerOnSelectionBtn.disabled = true;
         }
 
         function createChunkElement(chunkData) {
@@ -1157,7 +1264,13 @@
             actionsContainer.appendChild(aiBtn); actionsContainer.appendChild(editBtn); actionsContainer.appendChild(linkBtn); actionsContainer.appendChild(deleteBtn);
             header.appendChild(headerTitle); header.appendChild(actionsContainer);
             const content = document.createElement('div'); content.className = 'chunk-content'; content.contentEditable = true; content.innerHTML = chunkData.text;
-            content.addEventListener('input', () => { const currentChunkData = chunksMap.get(chunkDiv.id); if (currentChunkData) currentChunkData.text = content.innerHTML; });
+            content.addEventListener('input', () => { 
+                const currentChunkData = chunksMap.get(chunkDiv.id); 
+                if (currentChunkData) { 
+                    currentChunkData.text = content.innerHTML; 
+                }
+                debouncedPopulateChunkList();
+            });
             content.addEventListener('focus', () => { highestZIndex++; chunkDiv.style.zIndex = String(highestZIndex); const currentChunkData = chunksMap.get(chunkDiv.id); if (currentChunkData) currentChunkData.zIndex = highestZIndex; if (!linkingMode) selectChunk(chunkData.id); });
             const resizeHandle = document.createElement('div'); resizeHandle.className = 'resize-handle'; resizeHandle.addEventListener('mousedown', onInteractionStart); resizeHandle.addEventListener('touchstart', onInteractionStart, { passive: false });
             chunkDiv.appendChild(header); chunkDiv.appendChild(content); chunkDiv.appendChild(resizeHandle);
@@ -1180,18 +1293,63 @@
             }
             if (selectedChunkId === chunkId) deselectAllChunks();
             if (linkingSourceChunkId === chunkId) cancelLinkingMode(false);
-            if(lastAddedChunkId === chunkId) {
-                lastAddedChunkId = null;
-                centerOnLastBtn.disabled = true;
-            }
             const chunkElement = document.getElementById(chunkId);
             if (chunkElement) noteCanvas.removeChild(chunkElement);
             drawConnections();
             updateChunkCounter();
             updateSelectedVisuals();
+            populateChunkList();
         }
-        function undoDeleteLastChunk() { if (lastDeletedChunk) { if (chunksMap.has(lastDeletedChunk.id)) { showMessage("Undo Failed", "A chunk with the same ID already exists. Cannot undo."); lastDeletedChunk = null; undoDeleteBtn.disabled = true; return; } chunks.push(lastDeletedChunk); chunksMap.set(lastDeletedChunk.id, lastDeletedChunk); createChunkElement(lastDeletedChunk); drawConnections(); selectChunk(lastDeletedChunk.id); lastDeletedChunk = null; undoDeleteBtn.disabled = true; showMessage("Undo Successful", "The last deleted chunk has been restored."); updateChunkCounter(); } else { showMessage("Nothing to Undo", "No chunk deletion to undo."); } }
-        function addChunkToCanvas(chunkDetails, options = {}) { const viewportRect = noteCanvasContainer.getBoundingClientRect(); const defaultWorldPos = screenToWorld( (viewportRect.left || 0) + (viewportRect.width || window.innerWidth) / 2, (viewportRect.top || 0) + (viewportRect.height || window.innerHeight) / 4 ); const newChunkData = { id: generateId(), chunkTypeTag: chunkDetails.type.tag, shapeName: chunkDetails.shape.name, shapeSymbol: chunkDetails.shape.symbol, colorName: chunkDetails.color.name, colorSymbol: chunkDetails.color.symbol, colorTailwindClass: chunkDetails.color.tailwindClass, text: options.text || 'New chunk... Start typing!', x: options.x !== undefined ? options.x : Math.max(0, defaultWorldPos.x), y: options.y !== undefined ? options.y : Math.max(0, defaultWorldPos.y), width: options.width || 250, height: options.height || 150, zIndex: ++highestZIndex, links: [] }; chunks.push(newChunkData); chunksMap.set(newChunkData.id, newChunkData); createChunkElement(newChunkData); selectChunk(newChunkData.id); lastAddedChunkId = newChunkData.id; centerOnLastBtn.disabled = false; drawConnections(); updateChunkCounter(); return newChunkData; }
+        function undoDeleteLastChunk() { 
+            if (lastDeletedChunk) { 
+                if (chunksMap.has(lastDeletedChunk.id)) { 
+                    showMessage("Undo Failed", "A chunk with the same ID already exists. Cannot undo."); 
+                    lastDeletedChunk = null; 
+                    undoDeleteBtn.disabled = true; 
+                    return; 
+                } 
+                chunks.push(lastDeletedChunk); 
+                chunksMap.set(lastDeletedChunk.id, lastDeletedChunk); 
+                createChunkElement(lastDeletedChunk); 
+                drawConnections(); 
+                selectChunk(lastDeletedChunk.id); 
+                lastDeletedChunk = null; 
+                undoDeleteBtn.disabled = true; 
+                showMessage("Undo Successful", "The last deleted chunk has been restored."); 
+                updateChunkCounter(); 
+                populateChunkList();
+            } else { 
+                showMessage("Nothing to Undo", "No chunk deletion to undo."); 
+            } 
+        }
+        function addChunkToCanvas(chunkDetails, options = {}) { 
+            const viewportRect = noteCanvasContainer.getBoundingClientRect(); 
+            const defaultWorldPos = screenToWorld( (viewportRect.left || 0) + (viewportRect.width || window.innerWidth) / 2, (viewportRect.top || 0) + (viewportRect.height || window.innerHeight) / 4 ); 
+            const newChunkData = { 
+                id: generateId(), 
+                chunkTypeTag: chunkDetails.type.tag, 
+                shapeName: chunkDetails.shape.name, 
+                shapeSymbol: chunkDetails.shape.symbol, 
+                colorName: chunkDetails.color.name, 
+                colorSymbol: chunkDetails.color.symbol, 
+                colorTailwindClass: chunkDetails.color.tailwindClass, 
+                text: options.text || 'New chunk... Start typing!', 
+                x: options.x !== undefined ? options.x : Math.max(0, defaultWorldPos.x), 
+                y: options.y !== undefined ? options.y : Math.max(0, defaultWorldPos.y), 
+                width: options.width || 250, 
+                height: options.height || 150, 
+                zIndex: ++highestZIndex, 
+                links: [] 
+            }; 
+            chunks.push(newChunkData); 
+            chunksMap.set(newChunkData.id, newChunkData); 
+            createChunkElement(newChunkData); 
+            selectChunk(newChunkData.id); 
+            drawConnections(); 
+            updateChunkCounter(); 
+            populateChunkList();
+            return newChunkData; 
+        }
 
         function startLinkingMode(sourceId) { linkingMode = true; linkingSourceChunkId = sourceId; document.body.classList.add('linking-mode'); selectChunk(sourceId); }
         function cancelLinkingMode(cancelledByDeselectAll = false) { linkingMode = false; const prevSourceId = linkingSourceChunkId; linkingSourceChunkId = null; document.body.classList.remove('linking-mode'); if (cancelledByDeselectAll) { selectedChunkId = null; } else if (prevSourceId) { selectChunk(prevSourceId); } updateSelectedVisuals(); }
@@ -1417,7 +1575,6 @@
                     const chunkWidth = parseFloat(draggedChunk.style.width);
                     const chunkHeight = parseFloat(draggedChunk.style.height);
 
-                    // Clamp the chunk's position to keep it within the canvas boundaries.
                     newWorldX = Math.max(0, Math.min(newWorldX, canvasWorldWidth - chunkWidth));
                     newWorldY = Math.max(0, Math.min(newWorldY, canvasWorldHeight - chunkHeight));
 
@@ -1431,7 +1588,6 @@
                     let newWidth = startWidth + (deltaScreenX / scale);
                     let newHeight = startHeight + (deltaScreenY / scale);
                     
-                    // Enforce minimum dimensions
                     newWidth = Math.max(100, newWidth);
                     newHeight = Math.max(80, newHeight);
                     
@@ -1440,7 +1596,6 @@
                     const canvasWorldWidth = noteCanvas.scrollWidth;
                     const canvasWorldHeight = noteCanvas.scrollHeight;
 
-                    // Clamp the chunk's size to prevent it from resizing beyond the canvas boundaries.
                     if (chunkCurrentX + newWidth > canvasWorldWidth) {
                         newWidth = canvasWorldWidth - chunkCurrentX;
                     }
@@ -1464,13 +1619,11 @@
 
         function onInteractionEnd(e) { if (currentAction === 'drag' && draggedChunk) { const chunkData = chunksMap.get(draggedChunk.id); if (chunkData) { chunkData.x = parseFloat(draggedChunk.style.left); chunkData.y = parseFloat(draggedChunk.style.top); } draggedChunk = null; } else if (currentAction === 'resize' && resizingChunk) { const chunkData = chunksMap.get(resizingChunk.id); if (chunkData) { chunkData.width = parseFloat(resizingChunk.style.width); chunkData.height = parseFloat(resizingChunk.style.height); } resizingChunk = null; } else if (currentAction === 'pan') { noteCanvasContainer.classList.remove('panning'); } if (currentAction !== 'pinch-zoom') { currentAction = null; } document.removeEventListener('mousemove', onInteractionMove); document.removeEventListener('mouseup', onInteractionEnd); document.removeEventListener('touchmove', onInteractionMove); document.removeEventListener('touchend', onInteractionEnd); }
         
-        // MODIFIED: getCombinedTextForExport to handle new formats
         function getCombinedTextForExport(format) {
             const tempDiv = document.createElement('div');
             function cleanTextForExport(html) {
                 tempDiv.innerHTML = html.replace(/<br>/g, '\n').replace(/<p>/g, '').replace(/<\/p>/g, '\n\n');
                 let text = (tempDiv.textContent || tempDiv.innerText || "").trim();
-                // For CSV, escape quotes and wrap in quotes if it contains commas or newlines
                 if (format === 'csv' && (text.includes(',') || text.includes('"') || text.includes('\n'))) {
                     text = '"' + text.replace(/"/g, '""') + '"';
                 }
@@ -1583,17 +1736,14 @@
 
         function saveDataToFile() { chunks.forEach(chunkData => { const chunkElement = document.getElementById(chunkData.id); if (chunkElement) { const contentDiv = chunkElement.querySelector('.chunk-content'); if (contentDiv) { chunkData.text = contentDiv.innerHTML; } } }); if (chunks.length === 0) { showMessage("Empty Board", "There are no notes to save."); return; } setButtonLoading(saveBtn, true); try { const dataToSave = { chunks: chunks, viewport: { scale: scale, translateX: translateX, translateY: translateY } }; const dataStr = JSON.stringify(dataToSave, null, 2); downloadFile(dataStr, 'chorus-strategist-map.json', 'application/json'); showMessage('Saved to File', 'Your board has been prepared for download.'); } catch (error) { showMessage('Save Error', `Could not prepare data for saving: ${error.message}`); console.error("Save error:", error); } finally { setButtonLoading(saveBtn, false); } }
         
-        // NEW: Function to save the current board as a template file
         function saveAsTemplate() {
             if (chunks.length === 0) {
                 showMessage("Empty Board", "There is nothing on the board to save as a template.");
                 return;
             }
         
-            // Deep copy of chunks to avoid modifying the live data
             let templateChunks = JSON.parse(JSON.stringify(chunks));
         
-            // Normalize coordinates: find top-leftmost point and make it the origin (0,0)
             let minX = Infinity;
             let minY = Infinity;
             templateChunks.forEach(chunk => {
@@ -1601,24 +1751,21 @@
                 minY = Math.min(minY, chunk.y);
             });
         
-            // Remap coordinates relative to the top-left corner with some padding
             templateChunks.forEach(chunk => {
-                chunk.x = chunk.x - minX + 50; // Add 50px padding
+                chunk.x = chunk.x - minX + 50;
                 chunk.y = chunk.y - minY + 50;
-                // We don't need zIndex for templates
                 delete chunk.zIndex;
             });
         
             const templateData = {
                 name: "Custom Template",
                 description: "A custom template saved from the board.",
-                chunks: templateChunks.map(({ id, links, ...rest }) => rest), // Keep links but strip original IDs
+                chunks: templateChunks.map(({ id, links, ...rest }) => rest),
                 links: templateChunks.flatMap(chunk => 
                     (chunk.links || []).map(link => ({ from: chunk.id, to: link.targetId, ...link }))
                 )
             };
         
-            // Re-map internal link IDs to placeholder numbers (e.g., chunk-12345 -> 1)
             const idMap = new Map();
             let counter = 1;
             templateData.chunks.forEach(chunk => {
@@ -1635,7 +1782,7 @@
                 to: idMap.get(link.to),
                 type: link.type,
                 label: link.label
-            })).filter(link => link.from && link.to); // Filter out any broken links
+            })).filter(link => link.from && link.to);
 
             const dataStr = JSON.stringify({ chunks: templateData.chunks, links: templateData.links }, null, 2);
             downloadFile(dataStr, 'chorus-custom-template.json', 'application/json');
@@ -1646,7 +1793,7 @@
         
         function renderBoard(loadedChunksData) {
             const existingChunkElements = noteCanvas.querySelectorAll('.chorus-chunk'); existingChunkElements.forEach(el => el.remove());
-            chunks = loadedChunksData || []; chunksMap.clear(); highestZIndex = 0; selectedChunkId = null; lastDeletedChunk = null; undoDeleteBtn.disabled = true; centerOnSelectionBtn.disabled = true; lastAddedChunkId = null; centerOnLastBtn.disabled = true; cancelLinkingMode(true);
+            chunks = loadedChunksData || []; chunksMap.clear(); highestZIndex = 0; selectedChunkId = null; lastDeletedChunk = null; undoDeleteBtn.disabled = true; cancelLinkingMode(true);
             if (Array.isArray(chunks)) { 
                 chunks.forEach(chunkData => { 
                     if (chunkData.nextChunkIds && Array.isArray(chunkData.nextChunkIds)) {
@@ -1665,7 +1812,11 @@
                 }); 
             }
             if(chunks.length === 0) highestZIndex = 1;
-            updateSelectedVisuals(); drawConnections(); updateChunkCounter(); updateLayerVisibility();
+            updateSelectedVisuals(); 
+            drawConnections(); 
+            updateChunkCounter(); 
+            updateLayerVisibility();
+            populateChunkList();
         }
 
         const originalButtonStates = {};
@@ -1696,6 +1847,64 @@
             });
         }
 
+        function debounce(func, timeout = 300){
+            let timer;
+            return (...args) => {
+                clearTimeout(timer);
+                timer = setTimeout(() => { func.apply(this, args); }, timeout);
+            };
+        }
+        const debouncedPopulateChunkList = debounce(() => populateChunkList(), 500);
+
+        function populateChunkList() {
+            chunkListDropdown.innerHTML = ''; 
+
+            if (chunks.length === 0) {
+                const noChunksItem = document.createElement('div');
+                noChunksItem.className = 'px-4 py-2 text-sm text-[var(--text-secondary)]';
+                noChunksItem.textContent = 'No chunks on canvas.';
+                chunkListDropdown.appendChild(noChunksItem);
+                return;
+            }
+
+            const sortedChunks = [...chunks].sort((a, b) => {
+                const typeA = a.chunkTypeTag.toLowerCase();
+                const typeB = b.chunkTypeTag.toLowerCase();
+                if (typeA < typeB) return -1;
+                if (typeA > typeB) return 1;
+                
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = a.text;
+                const textA = (tempDiv.textContent || tempDiv.innerText || "").trim().toLowerCase();
+                tempDiv.innerHTML = b.text;
+                const textB = (tempDiv.textContent || tempDiv.innerText || "").trim().toLowerCase();
+
+                if (textA < textB) return -1;
+                if (textA > textB) return 1;
+
+                return 0;
+            });
+
+            sortedChunks.forEach(chunk => {
+                const listItem = document.createElement('button');
+                listItem.className = 'w-full text-left p-2 hover:bg-[var(--bg-primary)] rounded-md';
+                
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = chunk.text;
+                let cleanText = (tempDiv.textContent || tempDiv.innerText || "").trim();
+                if (cleanText.length > 30) {
+                    cleanText = cleanText.substring(0, 30) + '...';
+                }
+
+                listItem.innerHTML = `<div class="font-bold text-sm">${chunk.chunkTypeTag}</div><div class="text-xs text-[var(--text-secondary)]">${cleanText || '(no text)'}</div>`;
+                
+                listItem.addEventListener('click', () => {
+                    centerOnChunk(chunk.id, false); 
+                    chunkListDropdown.classList.remove('show');
+                });
+                chunkListDropdown.appendChild(listItem);
+            });
+        }
 
         // --- Initialization Sequence ---
         function initializeApp() {
@@ -1716,7 +1925,7 @@
             // Toolbar
             addChunkBtn.addEventListener('click', () => { if(linkingMode) cancelLinkingMode(false); showModal(addChunkModal); });
             templatesBtn.addEventListener('click', () => showModal(templatesModal));
-            clearCanvasBtn.addEventListener('click', () => { if (linkingMode) cancelLinkingMode(false); if (chunks.length === 0) { showMessage("Canvas Empty", "The canvas is already clear."); return; } showMessage("Confirm Clear", "Are you sure you want to clear the entire canvas? This action cannot be undone.", [ { text: 'Cancel', class: 'btn-secondary' }, { text: 'Clear Canvas', class: 'btn-danger', action: () => { renderBoard([]); lastAddedChunkId = null; centerOnLastBtn.disabled = true; showMessage("Canvas Cleared", "All notes and links have been removed."); }} ]); });
+            clearCanvasBtn.addEventListener('click', () => { if (linkingMode) cancelLinkingMode(false); if (chunks.length === 0) { showMessage("Canvas Empty", "The canvas is already clear."); return; } showMessage("Confirm Clear", "Are you sure you want to clear the entire canvas? This action cannot be undone.", [ { text: 'Cancel', class: 'btn-secondary' }, { text: 'Clear Canvas', class: 'btn-danger', action: () => { renderBoard([]); populateChunkList(); showMessage("Canvas Cleared", "All notes and links have been removed."); }} ]); });
             undoDeleteBtn.addEventListener('click', () => { if (linkingMode) cancelLinkingMode(false); undoDeleteLastChunk(); });
             summarizeBtn.addEventListener('click', summarizeBoard);
             viewToggleBtn.addEventListener('click', toggleView);
@@ -1747,23 +1956,13 @@
             });
 
             zoomResetBtn.addEventListener('click', resetAndCenterView);
-            centerOnSelectionBtn.addEventListener('click', () => {
-                if(selectedChunkId) {
-                    centerOnChunk(selectedChunkId, false);
-                }
-            });
-            centerOnLastBtn.addEventListener('click', () => {
-                if(lastAddedChunkId) {
-                    centerOnChunk(lastAddedChunkId, false);
-                }
-            });
             saveBtn.addEventListener('click', saveDataToFile);
             loadBtn.addEventListener('click', () => { if(linkingMode) cancelLinkingMode(false); if (chunks.length > 0) { showMessage("Confirm Load", "Loading a new file will clear any unsaved changes on the current canvas. Are you sure you want to proceed?", [ { text: 'Cancel', class: 'btn-secondary' }, { text: 'Load File', class: 'btn-primary', action: () => fileLoadInput.click() } ]); } else { fileLoadInput.click(); } });
             settingsBtn.addEventListener('click', () => showModal(settingsModal));
             helpBtn.addEventListener('click', () => { if(linkingMode) cancelLinkingMode(false); showModal(helpModal); });
-            donateBtn.addEventListener('click', () => window.open('https://ko-fi.com/thorstenbecker', '_blank', 'noopener,noreferrer'));
+            donateBtn.addEventListener('click', () => showModal(supportModal));
             
-            // --- NEW: Export Button Events ---
+            // Export Button Events
             exportTxtBtn.addEventListener('click', () => {
                 downloadFile(getCombinedTextForExport('txt'), 'chorus-export.txt', 'text/plain;charset=utf-8');
                 document.querySelectorAll('.dropdown-content.show').forEach(openContent => openContent.classList.remove('show'));
@@ -1786,7 +1985,7 @@
                 document.querySelectorAll('.dropdown-content.show').forEach(openContent => openContent.classList.remove('show'));
             });
 
-            // --- NEW: Custom Template Button Events ---
+            // Custom Template Button Events
             saveAsTemplateBtn.addEventListener('click', saveAsTemplate);
             loadCustomTemplateBtn.addEventListener('click', () => customTemplateLoadInput.click());
             
@@ -1805,7 +2004,7 @@
                 hideModal(addChunkModal); 
             });
             cancelEditChunkBtn.addEventListener('click', () => hideModal(editChunkModal));
-            confirmEditChunkBtn.addEventListener('click', () => { const chunkId = editingChunkIdInput.value; const chunkData = chunksMap.get(chunkId); if (!chunkData) return; const newType = allChunkTypesList.find(ct => ct.tag === editChunkTypeSelect.value); const newShape = SHAPES.find(s => s.name === editChunkShapeSelect.value); const newColor = COLORS.find(c => c.name === editChunkColorSelect.value); if (!newType || !newShape || !newColor) { showMessage('Error', 'Invalid selection.'); return; } chunkData.chunkTypeTag = newType.tag; chunkData.shapeName = newShape.name; chunkData.shapeSymbol = newShape.symbol; chunkData.colorName = newColor.name; chunkData.colorSymbol = newColor.symbol; chunkData.colorTailwindClass = newColor.tailwindClass; updateChunkHeaderDisplay(chunkId); hideModal(editChunkModal); updateSelectedVisuals(); updateLayerVisibility(); drawConnections(); });
+            confirmEditChunkBtn.addEventListener('click', () => { const chunkId = editingChunkIdInput.value; const chunkData = chunksMap.get(chunkId); if (!chunkData) return; const newType = allChunkTypesList.find(ct => ct.tag === editChunkTypeSelect.value); const newShape = SHAPES.find(s => s.name === editChunkShapeSelect.value); const newColor = COLORS.find(c => c.name === editChunkColorSelect.value); if (!newType || !newShape || !newColor) { showMessage('Error', 'Invalid selection.'); return; } chunkData.chunkTypeTag = newType.tag; chunkData.shapeName = newShape.name; chunkData.shapeSymbol = newShape.symbol; chunkData.colorName = newColor.name; chunkData.colorSymbol = newColor.symbol; chunkData.colorTailwindClass = newColor.tailwindClass; updateChunkHeaderDisplay(chunkId); hideModal(editChunkModal); updateSelectedVisuals(); updateLayerVisibility(); drawConnections(); populateChunkList(); });
             cancelSettingsBtn.addEventListener('click', () => hideModal(settingsModal));
             closeSettingsModalBtn.addEventListener('click', () => hideModal(settingsModal));
             saveSettingsBtn.addEventListener('click', () => { saveApiKey(); saveCustomChunkTypes(); saveDisplaySettings(); hideModal(settingsModal); });
@@ -1832,7 +2031,7 @@
                 cancelLinkingMode(false);
             });
             
-            // Main File Load listener
+            // File Load listener
             const fileLoadHandler = (file, buttonToLoad, isTemplate) => {
                 if (!file) return;
                 if (file.type !== "application/json") {
@@ -1909,7 +2108,50 @@
             noteCanvasContainer.addEventListener('wheel', (e) => { e.preventDefault(); const rect = noteCanvasContainer.getBoundingClientRect(); const mouseX = e.clientX - (rect.left || 0); const mouseY = e.clientY - (rect.top || 0); const worldXBeforeZoom = (mouseX - translateX) / scale; const worldYBeforeZoom = (mouseY - translateY) / scale; const delta = e.deltaY * ZOOM_SENSITIVITY * -1; let newScale = scale * (1 + delta); newScale = Math.max(MIN_SCALE, Math.min(newScale, MAX_SCALE)); translateX = mouseX - worldXBeforeZoom * newScale; translateY = mouseY - worldYBeforeZoom * newScale; scale = newScale; applyTransform(); }, { passive: false });
             noteCanvasContainer.addEventListener('touchmove', (e) => { if (currentAction === 'pinch-zoom' && e.touches.length === 2) { e.preventDefault(); const t1 = { x: e.touches[0].clientX, y: e.touches[0].clientY }; const t2 = { x: e.touches[1].clientX, y: e.touches[1].clientY }; const currentPinchDistance = Math.hypot(t1.x - t2.x, t1.y - t2.y); const pinchMidpointScreen = { x: (t1.x + t2.x) / 2, y: (t1.y + t2.y) / 2 }; if (initialPinchDistance === null) { initialPinchDistance = currentPinchDistance; return; } const rect = noteCanvasContainer.getBoundingClientRect(); const worldMidXBeforeZoom = (pinchMidpointScreen.x - (rect.left || 0) - translateX) / scale; const worldMidYBeforeZoom = (pinchMidpointScreen.y - (rect.top || 0) - translateY) / scale; let scaleChange = currentPinchDistance / initialPinchDistance; let newScale = scale * scaleChange; newScale = Math.max(MIN_SCALE, Math.min(newScale, MAX_SCALE)); translateX = (pinchMidpointScreen.x - (rect.left || 0)) - worldMidXBeforeZoom * newScale; translateY = (pinchMidpointScreen.y - (rect.top || 0)) - worldMidYBeforeZoom * newScale; scale = newScale; applyTransform(); initialPinchDistance = currentPinchDistance; } }, { passive: false });
             noteCanvasContainer.addEventListener('touchend', (e) => { if (e.touches.length < 2 && currentAction === 'pinch-zoom') { initialPinchDistance = null; currentAction = null; } });
-            document.addEventListener('keydown', (e) => { const activeEl = document.activeElement; const isInputFocused = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable); const isCtrlOrCmd = e.ctrlKey || e.metaKey; let shortcutHandled = false; if (isCtrlOrCmd) { switch (e.key.toLowerCase()) { case 's': saveBtn.click(); shortcutHandled = true; break; case 'o': loadBtn.click(); shortcutHandled = true; break; case 'z': if (!undoDeleteBtn.disabled) { undoDeleteBtn.click(); shortcutHandled = true; } break; } } if(shortcutHandled){ e.preventDefault(); return; } if (isInputFocused) { if (e.key === 'Escape') { activeEl.blur(); } return; } switch(e.key.toLowerCase()){ case 'escape': if (!addChunkModal.classList.contains('hidden')) { hideModal(addChunkModal); } else if (!editChunkModal.classList.contains('hidden')) { hideModal(editChunkModal); } else if (!helpModal.classList.contains('hidden')) { hideModal(helpModal); } else if (!messageModal.classList.contains('hidden')) { hideModal(messageModal); } else if (!aiActionModal.classList.contains('hidden')) { hideModal(aiActionModal); } else if (!settingsModal.classList.contains('hidden')) { hideModal(settingsModal); } else if (linkingMode) { cancelLinkingMode(false); } else if (selectedChunkId) { deselectAllChunks(); } shortcutHandled = true; break; case 'delete': case 'backspace': if (selectedChunkId) { showMessage("Confirm Delete", `Are you sure you want to delete the selected chunk (${chunksMap.get(selectedChunkId)?.chunkTypeTag || 'chunk'})?`, [ { text: 'Cancel', class: 'btn-secondary' }, { text: 'Delete', class: 'btn-danger', action: () => { deleteChunk(selectedChunkId); }} ]); shortcutHandled = true; } break; case 'a': addChunkBtn.click(); shortcutHandled = true; break; case '+': case '=': zoomInBtn.click(); shortcutHandled = true; break; case '-': zoomOutBtn.click(); shortcutHandled = true; break; case '0': zoomResetBtn.click(); shortcutHandled = true; break; case '?': case '/': helpBtn.click(); shortcutHandled = true; break; case 'c': if(!centerOnSelectionBtn.disabled) { centerOnSelectionBtn.click(); shortcutHandled = true; } break; case 'l': if(!centerOnLastBtn.disabled) { centerOnLastBtn.click(); shortcutHandled = true; } break;} if(shortcutHandled){ e.preventDefault(); } });
+            document.addEventListener('keydown', (e) => { 
+                const activeEl = document.activeElement; 
+                const isInputFocused = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable); 
+                const isCtrlOrCmd = e.ctrlKey || e.metaKey; 
+                let shortcutHandled = false; 
+                if (isCtrlOrCmd) { 
+                    switch (e.key.toLowerCase()) { 
+                        case 's': saveBtn.click(); shortcutHandled = true; break; 
+                        case 'o': loadBtn.click(); shortcutHandled = true; break; 
+                        case 'z': if (!undoDeleteBtn.disabled) { undoDeleteBtn.click(); shortcutHandled = true; } break; 
+                    } 
+                } 
+                if(shortcutHandled){ e.preventDefault(); return; } 
+                if (isInputFocused) { if (e.key === 'Escape') { activeEl.blur(); } return; } 
+                switch(e.key.toLowerCase()){ 
+                    case 'escape': 
+                        if (!addChunkModal.classList.contains('hidden')) { hideModal(addChunkModal); } 
+                        else if (!editChunkModal.classList.contains('hidden')) { hideModal(editChunkModal); } 
+                        else if (!helpModal.classList.contains('hidden')) { hideModal(helpModal); } 
+                        else if (!messageModal.classList.contains('hidden')) { hideModal(messageModal); } 
+                        else if (!aiActionModal.classList.contains('hidden')) { hideModal(aiActionModal); } 
+                        else if (!settingsModal.classList.contains('hidden')) { hideModal(settingsModal); } 
+                        else if (linkingMode) { cancelLinkingMode(false); } 
+                        else if (selectedChunkId) { deselectAllChunks(); } 
+                        shortcutHandled = true; 
+                        break; 
+                    case 'delete': 
+                    case 'backspace': 
+                        if (selectedChunkId) { 
+                            showMessage("Confirm Delete", `Are you sure you want to delete the selected chunk (${chunksMap.get(selectedChunkId)?.chunkTypeTag || 'chunk'})?`, [ 
+                                { text: 'Cancel', class: 'btn-secondary' }, 
+                                { text: 'Delete', class: 'btn-danger', action: () => { deleteChunk(selectedChunkId); }} 
+                            ]); 
+                            shortcutHandled = true; 
+                        } 
+                        break; 
+                    case 'a': addChunkBtn.click(); shortcutHandled = true; break; 
+                    case '+': case '=': zoomInBtn.click(); shortcutHandled = true; break; 
+                    case '-': zoomOutBtn.click(); shortcutHandled = true; break; 
+                    case '0': zoomResetBtn.click(); shortcutHandled = true; break; 
+                    case '?': case '/': helpBtn.click(); shortcutHandled = true; break; 
+                } 
+                if(shortcutHandled){ e.preventDefault(); } 
+            });
 
             // Final setup
             let resizeQueued = false;
