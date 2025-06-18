@@ -1080,8 +1080,18 @@
         }
 
         function loadApiKey() { const key = localStorage.getItem('geminiApiKey'); if (key) { geminiApiKey = key; geminiApiKeyInput.value = key; } }
-        function saveApiKey() { const key = geminiApiKeyInput.value.trim(); if (key) { geminiApiKey = key; localStorage.setItem('geminiApiKey', key); showMessage("API Key Saved", "Your Gemini API key has been saved locally."); } else { localStorage.removeItem('geminiApiKey'); geminiApiKey = null; showMessage("API Key Cleared", "Your API key has been removed."); } }
-        
+		function saveApiKey() { 
+			const key = geminiApiKeyInput.value.trim(); 
+			if (key) { 
+				geminiApiKey = key; 
+				localStorage.setItem('geminiApiKey', key); 
+				showMessage("API Key Saved", "Your Gemini API key has been saved locally."); 
+			} else { 
+				localStorage.removeItem('geminiApiKey'); 
+				geminiApiKey = null; 
+				// The showMessage call for clearing the key is removed.
+			} 
+		}        
         function loadDisplaySettings() {
             const gridSetting = localStorage.getItem('chorusShowGrid');
             showGrid = gridSetting === null ? true : JSON.parse(gridSetting);
