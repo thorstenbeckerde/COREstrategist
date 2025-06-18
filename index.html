@@ -2171,8 +2171,27 @@
 
             // Final setup
             let resizeQueued = false;
-            window.addEventListener('resize', () => { if (resizeQueued) return; resizeQueued = true; requestAnimationFrame(() => { const toolbarElement = document.querySelector('.toolbar'); const footerElement = document.querySelector('footer'); let toolbarHeight = toolbarElement ? toolbarElement.offsetHeight : 0; let footerHeight = footerElement ? footerElement.offsetHeight : 0; if (mainContent) { mainContent.style.height = `calc(100vh - ${toolbarHeight}px - ${footerHeight}px)`; } applyTransform(); resizeQueued = false; }); });
-            window.dispatchEvent(new Event('resize'));
+            const appContainer = document.getElementById('appContainer');
+
+            function setAppHeight() {
+                if (appContainer) {
+                    // Use window.innerHeight to get the actual visible viewport height
+                    appContainer.style.height = `${window.innerHeight}px`;
+                }
+            }
+
+            window.addEventListener('resize', () => { 
+                if (resizeQueued) return; 
+                resizeQueued = true; 
+                requestAnimationFrame(() => { 
+                    setAppHeight();
+                    applyTransform(); 
+                    resizeQueued = false; 
+                }); 
+            });
+            
+            // Set the height initially on load
+            setAppHeight();
             resetAndCenterView();
             window.addEventListener('beforeunload', (event) => { if (chunks.length > 0) { event.preventDefault(); event.returnValue = ''; return ''; } });
             setTimeout(() => { document.getElementById('noteCanvasContainer').focus(); }, 100);
