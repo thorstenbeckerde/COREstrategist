@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>CHORUS AI: Strategist's Edition V5</title>
+    <title>CHORUS AI: Strategist's Edition V5.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -590,8 +590,12 @@
                     <p class="mb-2">This is a specialized version of the CHORUS thinking tool, adapted for strategic planning, wargaming, and competitive analysis. It replaces abstract concepts with a practical vocabulary for strategists, allowing you to map out complex operational environments.</p>
                     <p>Use it to visualize plans, analyze threats and opportunities, track resources, and simulate courses of action. The goal is to move beyond linear plans and embrace the dynamic, interconnected nature of strategy.</p>
                 </div>
+                 <div class="help-section">
+                    <h3>✨ NEW: Auto-Save & Session Restore</h3>
+                    <p>Your work is now <b>automatically saved</b> to your browser's local storage. When you return, a prompt will ask if you want to continue your last session or start fresh. Clearing the canvas or starting fresh will also clear this saved data.</p>
+                </div>
                 <div class="help-section">
-                    <h3>✨ Features</h3>
+                    <h3>Features</h3>
                     <ul>
                         <li><strong>Themes:</strong> Grim Dark, Space Strategy, and more themes available in Settings.</li>
                         <li><strong>Templates:</strong> Added 4X Strategy template.</li>
@@ -659,6 +663,21 @@
         </div>
     </div>
 
+    <!-- NEW: Session Restore Modal -->
+    <div id="sessionRestoreModal" class="modal hidden">
+        <div class="modal-content">
+            <h2 class="text-xl mb-4 font-bold">Welcome Back!</h2>
+            <p class="mb-6 text-text-primary">
+                We've restored your last session from a secure, local browser save.
+                You can continue where you left off, or start with a fresh, blank canvas.
+            </p>
+            <div class="flex justify-end gap-3">
+                <button id="startFreshBtn" class="btn btn-secondary">Start Fresh</button>
+                <button id="continueSessionBtn" class="btn btn-primary">Continue</button>
+            </div>
+        </div>
+    </div>
+
     <!-- File inputs for loading data and templates -->
     <input type="file" id="fileLoadInput" class="hidden" accept=".json,application/json">
     <input type="file" id="customTemplateLoadInput" class="hidden" accept=".json,application/json">
@@ -686,21 +705,94 @@
         const ICON_AI_SPARKLE = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.25 10.5l-1.5-1.5 1.5-1.5 1.5 1.5-1.5 1.5ZM16.5 3.75l-1.5-1.5 1.5-1.5 1.5 1.5-1.5 1.5Z" /></svg>`;
 
         // --- DOM Elements Cache ---
-        const noteCanvasContainer = document.getElementById('noteCanvasContainer'); const mainContent = document.getElementById('mainContent'); const timelineView = document.getElementById('timelineView'); const viewToggleBtn = document.getElementById('viewToggleBtn'); const transformContainer = document.getElementById('transformContainer'); const svgCanvas = document.getElementById('svgCanvas'); const noteCanvas = document.getElementById('noteCanvas'); const addChunkBtn = document.getElementById('addChunkBtn'); const templatesBtn = document.getElementById('templatesBtn'); const templatesModal = document.getElementById('templatesModal'); const templateList = document.getElementById('templateList'); const saveAsTemplateBtn = document.getElementById('saveAsTemplateBtn'); const loadCustomTemplateBtn = document.getElementById('loadCustomTemplateBtn'); const customTemplateLoadInput = document.getElementById('customTemplateLoadInput'); const layerControl = document.getElementById('layerControl'); const clearCanvasBtn = document.getElementById('clearCanvasBtn'); const undoDeleteBtn = document.getElementById('undoDeleteBtn'); const chunkCountDisplay = document.getElementById('chunkCountDisplay'); const zoomInBtn = document.getElementById('zoomInBtn'); const zoomOutBtn = document.getElementById('zoomOutBtn'); const zoomResetBtn = document.getElementById('zoomResetBtn'); const addChunkModal = document.getElementById('addChunkModal'); const chunkTypeSelect = document.getElementById('chunkTypeSelect'); const chunkShapeSelect = document.getElementById('chunkShapeSelect'); const chunkColorSelect = document.getElementById('chunkColorSelect'); const confirmAddChunkBtn = document.getElementById('confirmAddChunkBtn'); const cancelAddChunkBtn = document.getElementById('cancelAddChunkBtn'); const editChunkModal = document.getElementById('editChunkModal'); const editingChunkIdInput = document.getElementById('editingChunkId'); const editChunkTypeSelect = document.getElementById('editChunkTypeSelect'); const editChunkShapeSelect = document.getElementById('editChunkShapeSelect'); const editChunkColorSelect = document.getElementById('editChunkColorSelect'); const confirmEditChunkBtn = document.getElementById('confirmEditChunkBtn'); const cancelEditChunkBtn = document.getElementById('cancelEditChunkBtn'); const summarizeBtn = document.getElementById('summarizeBtn'); const settingsBtn = document.getElementById('settingsBtn'); const settingsModal = document.getElementById('settingsModal'); const geminiApiKeyInput = document.getElementById('geminiApiKeyInput'); const saveSettingsBtn = document.getElementById('saveSettingsBtn'); const cancelSettingsBtn = document.getElementById('cancelSettingsBtn'); const customTypesContainer = document.getElementById('customTypesContainer'); const addCustomTypeForm = document.getElementById('addCustomTypeForm'); const customTypeTagInput = document.getElementById('customTypeTag'); const customTypeDescInput = document.getElementById('customTypeDesc'); const aiActionModal = document.getElementById('aiActionModal'); const aiPromptTextarea = document.getElementById('aiPromptTextarea'); const aiActionGenerateBtn = document.getElementById('aiActionGenerateBtn'); const aiActionSuggestNextBtn = document.getElementById('aiActionSuggestNextBtn'); const cancelAiActionBtn = document.getElementById('cancelAiActionBtn'); const closeAiActionModalBtn = document.getElementById('closeAiActionModalBtn'); const closeSettingsModalBtn = document.getElementById('closeSettingsModalBtn'); const helpBtn = document.getElementById('helpBtn'); const helpModal = document.getElementById('helpModal'); const closeHelpBtn = document.getElementById('closeHelpBtn'); const closeHelpModalSpan = document.getElementById('closeHelpModalSpan'); const saveBtn = document.getElementById('saveBtn'); const loadBtn = document.getElementById('loadBtn'); const fileLoadInput = document.getElementById('fileLoadInput'); const messageModal = document.getElementById('messageModal'); const messageTitle = document.getElementById('messageTitle'); const messageText = document.getElementById('messageText'); const messageButtons = document.getElementById('messageButtons');
-        const unlinkModal = document.getElementById('unlinkModal'); const unlinkList = document.getElementById('unlinkList'); const closeUnlinkModalBtn = document.getElementById('closeUnlinkModalBtn');
-        const exportTxtBtn = document.getElementById('exportTxtBtn'); const exportMdBtn = document.getElementById('exportMdBtn'); const exportHtmlBtn = document.getElementById('exportHtmlBtn'); const exportJsonBtn = document.getElementById('exportJsonBtn'); const exportCsvBtn = document.getElementById('exportCsvBtn');
-        const donateBtn = document.getElementById('donateBtn');
-        const supportModal = document.getElementById('supportModal');
-        const linkEditModal = document.getElementById('linkEditModal'); const linkEditTitle = document.getElementById('linkEditTitle'); const linkTypeSelect = document.getElementById('linkTypeSelect'); const linkLabelInput = document.getElementById('linkLabelInput'); const cancelLinkEditBtn = document.getElementById('cancelLinkEditBtn'); const confirmLinkEditBtn = document.getElementById('confirmLinkEditBtn'); const linkSourceIdInput = document.getElementById('linkSourceId'); const linkTargetIdInput = document.getElementById('linkTargetId');
-        const gridToggle = document.getElementById('gridToggle'); const centerMarkerToggle = document.getElementById('centerMarkerToggle'); const centerMarker = document.getElementById('centerMarker');
-        const chunkListDropdown = document.getElementById('chunkListDropdown');
+        const DOMElements = {
+            noteCanvasContainer: document.getElementById('noteCanvasContainer'), mainContent: document.getElementById('mainContent'), timelineView: document.getElementById('timelineView'), viewToggleBtn: document.getElementById('viewToggleBtn'), transformContainer: document.getElementById('transformContainer'), svgCanvas: document.getElementById('svgCanvas'), noteCanvas: document.getElementById('noteCanvas'), addChunkBtn: document.getElementById('addChunkBtn'), templatesBtn: document.getElementById('templatesBtn'), templatesModal: document.getElementById('templatesModal'), templateList: document.getElementById('templateList'), saveAsTemplateBtn: document.getElementById('saveAsTemplateBtn'), loadCustomTemplateBtn: document.getElementById('loadCustomTemplateBtn'), customTemplateLoadInput: document.getElementById('customTemplateLoadInput'), layerControl: document.getElementById('layerControl'), clearCanvasBtn: document.getElementById('clearCanvasBtn'), undoDeleteBtn: document.getElementById('undoDeleteBtn'), chunkCountDisplay: document.getElementById('chunkCountDisplay'), zoomInBtn: document.getElementById('zoomInBtn'), zoomOutBtn: document.getElementById('zoomOutBtn'), zoomResetBtn: document.getElementById('zoomResetBtn'), addChunkModal: document.getElementById('addChunkModal'), chunkTypeSelect: document.getElementById('chunkTypeSelect'), chunkShapeSelect: document.getElementById('chunkShapeSelect'), chunkColorSelect: document.getElementById('chunkColorSelect'), confirmAddChunkBtn: document.getElementById('confirmAddChunkBtn'), cancelAddChunkBtn: document.getElementById('cancelAddChunkBtn'), editChunkModal: document.getElementById('editChunkModal'), editingChunkIdInput: document.getElementById('editingChunkId'), editChunkTypeSelect: document.getElementById('editChunkTypeSelect'), editChunkShapeSelect: document.getElementById('editChunkShapeSelect'), editChunkColorSelect: document.getElementById('editChunkColorSelect'), confirmEditChunkBtn: document.getElementById('confirmEditChunkBtn'), cancelEditChunkBtn: document.getElementById('cancelEditChunkBtn'), summarizeBtn: document.getElementById('summarizeBtn'), settingsBtn: document.getElementById('settingsBtn'), settingsModal: document.getElementById('settingsModal'), geminiApiKeyInput: document.getElementById('geminiApiKeyInput'), saveSettingsBtn: document.getElementById('saveSettingsBtn'), cancelSettingsBtn: document.getElementById('cancelSettingsBtn'), customTypesContainer: document.getElementById('customTypesContainer'), addCustomTypeForm: document.getElementById('addCustomTypeForm'), customTypeTagInput: document.getElementById('customTypeTag'), customTypeDescInput: document.getElementById('customTypeDesc'), aiActionModal: document.getElementById('aiActionModal'), aiPromptTextarea: document.getElementById('aiPromptTextarea'), aiActionGenerateBtn: document.getElementById('aiActionGenerateBtn'), aiActionSuggestNextBtn: document.getElementById('aiActionSuggestNextBtn'), cancelAiActionBtn: document.getElementById('cancelAiActionBtn'), closeAiActionModalBtn: document.getElementById('closeAiActionModalBtn'), closeSettingsModalBtn: document.getElementById('closeSettingsModalBtn'), helpBtn: document.getElementById('helpBtn'), helpModal: document.getElementById('helpModal'), closeHelpBtn: document.getElementById('closeHelpBtn'), closeHelpModalSpan: document.getElementById('closeHelpModalSpan'), saveBtn: document.getElementById('saveBtn'), loadBtn: document.getElementById('loadBtn'), fileLoadInput: document.getElementById('fileLoadInput'), messageModal: document.getElementById('messageModal'), messageTitle: document.getElementById('messageTitle'), messageText: document.getElementById('messageText'), messageButtons: document.getElementById('messageButtons'),
+            unlinkModal: document.getElementById('unlinkModal'), unlinkList: document.getElementById('unlinkList'), closeUnlinkModalBtn: document.getElementById('closeUnlinkModalBtn'),
+            exportTxtBtn: document.getElementById('exportTxtBtn'), exportMdBtn: document.getElementById('exportMdBtn'), exportHtmlBtn: document.getElementById('exportHtmlBtn'), exportJsonBtn: document.getElementById('exportJsonBtn'), exportCsvBtn: document.getElementById('exportCsvBtn'),
+            donateBtn: document.getElementById('donateBtn'),
+            supportModal: document.getElementById('supportModal'),
+            linkEditModal: document.getElementById('linkEditModal'), linkEditTitle: document.getElementById('linkEditTitle'), linkTypeSelect: document.getElementById('linkTypeSelect'), linkLabelInput: document.getElementById('linkLabelInput'), cancelLinkEditBtn: document.getElementById('cancelLinkEditBtn'), confirmLinkEditBtn: document.getElementById('confirmLinkEditBtn'), linkSourceIdInput: document.getElementById('linkSourceId'), linkTargetIdInput: document.getElementById('linkTargetId'),
+            gridToggle: document.getElementById('gridToggle'), centerMarkerToggle: document.getElementById('centerMarkerToggle'), centerMarker: document.getElementById('centerMarker'),
+            chunkListDropdown: document.getElementById('chunkListDropdown'),
+            // Session Restore Elements
+            sessionRestoreModal: document.getElementById('sessionRestoreModal'),
+            continueSessionBtn: document.getElementById('continueSessionBtn'),
+            startFreshBtn: document.getElementById('startFreshBtn'),
+        };
 
         // --- App State ---
         let currentView = 'canvas'; let chunkTypes = {}; let allChunkTypesList = []; let layerVisibility = {}; let chunks = []; let chunksMap = new Map();
-        let highestZIndex = 1; let draggedChunk = null; let resizingChunk = null; let interactionStartX = 0; let interactionStartY = 0; let offsetX = 0; let offsetY = 0; let startX = 0; let startY = 0; let startWidth = 0; let startHeight = 0; let selectedChunkId = null; let linkingMode = false; let linkingSourceChunkId = null; let lastDeletedChunk = null; let lastAddedChunkId = null; let geminiApiKey = null; let activeAiChunkId = null;
+        let highestZIndex = 1; let selectedChunkId = null; let linkingMode = false; let linkingSourceChunkId = null; let lastDeletedChunk = null; let lastAddedChunkId = null; let geminiApiKey = null; let activeAiChunkId = null;
         let scale = 1; let translateX = 0; let translateY = 0; const MIN_SCALE = 0.1; const MAX_SCALE = 3.0; const ZOOM_SENSITIVITY = 0.001;
         let currentAction = null; let panStartX = 0; let panStartY = 0; let initialPinchDistance = null; let transformUpdateQueued = false;
         let showGrid = true; let showCenterMarker = false;
+        
+        // --- Auto-Save & Session Management ---
+        const AUTO_SAVE_KEY = 'chorusStrategistAutoSave';
+        let autoSaveTimeout;
+
+        function triggerAutoSave() {
+            clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(() => {
+                if (chunks.length === 0) {
+                    clearAutoSave();
+                    return;
+                }
+                // Make sure current text is saved from contenteditable divs before serializing
+                chunks.forEach(chunkData => {
+                    const chunkElement = document.getElementById(chunkData.id);
+                    if (chunkElement) {
+                        const contentDiv = chunkElement.querySelector('.chunk-content');
+                        if (contentDiv) {
+                            chunkData.text = contentDiv.innerHTML;
+                        }
+                    }
+                });
+                const dataToSave = {
+                    chunks: chunks,
+                    viewport: { scale, translateX, translateY },
+                    lastDeletedChunk: lastDeletedChunk,
+                    highestZIndex: highestZIndex,
+                    layerVisibility: layerVisibility
+                };
+                localStorage.setItem(AUTO_SAVE_KEY, JSON.stringify(dataToSave));
+            }, 1000); // Debounce for 1 second
+        }
+
+        function clearAutoSave() {
+            localStorage.removeItem(AUTO_SAVE_KEY);
+        }
+
+        function loadSessionFromAutoSave() {
+            const savedDataJSON = localStorage.getItem(AUTO_SAVE_KEY);
+            if (!savedDataJSON) return false;
+            
+            try {
+                const savedData = JSON.parse(savedDataJSON);
+                if (savedData && Array.isArray(savedData.chunks) && savedData.chunks.length > 0) {
+                    // Pre-load state from save
+                    chunks = savedData.chunks;
+                    if (savedData.viewport) {
+                        scale = savedData.viewport.scale || 1;
+                        translateX = savedData.viewport.translateX || 0;
+                        translateY = savedData.viewport.translateY || 0;
+                    }
+                    lastDeletedChunk = savedData.lastDeletedChunk || null;
+                    highestZIndex = savedData.highestZIndex || 1;
+                    if (savedData.layerVisibility) {
+                        layerVisibility = savedData.layerVisibility;
+                    }
+                    
+                    // Show modal to let user decide
+                    showModal(DOMElements.sessionRestoreModal);
+                    return true; // Session found and modal shown
+                }
+            } catch (e) {
+                console.error("Error parsing auto-saved session data:", e);
+                clearAutoSave(); // Clear corrupted data
+            }
+            return false; // No valid session found
+        }
         
         // --- Added new templates and themes ---
         const STRATEGIC_TEMPLATES = {
@@ -716,17 +808,17 @@
         function generateId() { return 'chunk-' + Date.now() + '-' + Math.random().toString(36).substring(2, 9); }
         function showModal(modalElement) { modalElement.classList.remove('hidden'); }
         function hideModal(modalElement) { modalElement.classList.add('hidden'); }
-        function showMessage(title, text, buttonsConfig = [{ text: 'OK', class: 'btn-primary', action: () => hideModal(messageModal) }]) {
-            messageTitle.textContent = title; messageText.innerHTML = text; messageButtons.innerHTML = '';
+        function showMessage(title, text, buttonsConfig = [{ text: 'OK', class: 'btn-primary', action: () => hideModal(DOMElements.messageModal) }]) {
+            DOMElements.messageTitle.textContent = title; DOMElements.messageText.innerHTML = text; DOMElements.messageButtons.innerHTML = '';
             buttonsConfig.forEach(btnConfig => {
                 const button = document.createElement('button');
                 button.className = `btn ${btnConfig.class || 'btn-secondary'}`; button.textContent = btnConfig.text;
-                button.onclick = () => { if (btnConfig.action) btnConfig.action(); if (!btnConfig.noHide) hideModal(messageModal); };
-                messageButtons.appendChild(button);
+                button.onclick = () => { if (btnConfig.action) btnConfig.action(); if (!btnConfig.noHide) hideModal(DOMElements.messageModal); };
+                DOMElements.messageButtons.appendChild(button);
             });
-            showModal(messageModal);
+            showModal(DOMElements.messageModal);
         }
-        function updateChunkCounter() { chunkCountDisplay.textContent = `Chunks: ${chunks.length}`; }
+        function updateChunkCounter() { DOMElements.chunkCountDisplay.textContent = `Chunks: ${chunks.length}`; }
 
         function populateSelectWithOptions(selectElement, optionsArray, currentValue, groups = null, groupLabelFormatterFn = null) {
             selectElement.innerHTML = '';
@@ -802,13 +894,13 @@
         }
 
         function populateAddChunkModal() { 
-            populateSelectWithOptions(chunkTypeSelect, null, null, chunkTypes, key => key.charAt(0).toUpperCase() + key.slice(1) + " Types"); 
-            populateSelectWithOptions(chunkShapeSelect, SHAPES.map(s => ({value: s.name, text: `${s.symbol} ${s.name} - ${s.meaning}`})), SHAPES[0].name); 
-            populateSelectWithOptions(chunkColorSelect, COLORS.map(c => ({value: c.name, text: `${c.symbol} ${c.name} - ${c.essence}`})), COLORS[0].name); 
+            populateSelectWithOptions(DOMElements.chunkTypeSelect, null, null, chunkTypes, key => key.charAt(0).toUpperCase() + key.slice(1) + " Types"); 
+            populateSelectWithOptions(DOMElements.chunkShapeSelect, SHAPES.map(s => ({value: s.name, text: `${s.symbol} ${s.name} - ${s.meaning}`})), SHAPES[0].name); 
+            populateSelectWithOptions(DOMElements.chunkColorSelect, COLORS.map(c => ({value: c.name, text: `${c.symbol} ${c.name} - ${c.essence}`})), COLORS[0].name); 
         }
 
         function renderCustomTypesUI() {
-            customTypesContainer.innerHTML = '';
+            DOMElements.customTypesContainer.innerHTML = '';
             const allTypes = Object.values(chunkTypes).flat();
             allTypes.forEach(type => {
                 const typeDiv = document.createElement('div');
@@ -835,7 +927,7 @@
                     };
                     typeDiv.appendChild(deleteBtn);
                 }
-                customTypesContainer.appendChild(typeDiv);
+                DOMElements.customTypesContainer.appendChild(typeDiv);
             });
         }
         
@@ -862,8 +954,8 @@
                  renderCustomTypesUI();
                  populateHelpModal();
                  populateAddChunkModal();
-                 if (!editChunkModal.classList.contains('hidden')) {
-                     const chunkId = editingChunkIdInput.value;
+                 if (!DOMElements.editChunkModal.classList.contains('hidden')) {
+                     const chunkId = DOMElements.editingChunkIdInput.value;
                      if(chunkId) openEditChunkModal(chunkId);
                  }
             } catch (e) { console.error("Could not save custom chunk types.", e); showMessage("Error", "Could not save custom chunk types to local storage."); }
@@ -873,21 +965,21 @@
             currentView = (currentView === 'canvas') ? 'timeline' : 'canvas';
             if (currentView === 'timeline') {
                 renderTimelineView();
-                noteCanvasContainer.style.display = 'none';
-                timelineView.style.display = 'block';
-                viewToggleBtn.textContent = 'Canvas';
+                DOMElements.noteCanvasContainer.style.display = 'none';
+                DOMElements.timelineView.style.display = 'block';
+                DOMElements.viewToggleBtn.textContent = 'Canvas';
             } else {
-                noteCanvasContainer.style.display = 'block';
-                timelineView.style.display = 'none';
-                viewToggleBtn.textContent = 'Timeline';
+                DOMElements.noteCanvasContainer.style.display = 'block';
+                DOMElements.timelineView.style.display = 'none';
+                DOMElements.viewToggleBtn.textContent = 'Timeline';
                 applyTransform();
             }
         }
         
         function renderTimelineView() {
-            timelineView.innerHTML = '';
+            DOMElements.timelineView.innerHTML = '';
             if (chunks.length === 0) {
-                timelineView.innerHTML = '<p class="text-center p-8">No chunks to display in timeline.</p>';
+                DOMElements.timelineView.innerHTML = '<p class="text-center p-8">No chunks to display in timeline.</p>';
                 return;
             }
 
@@ -942,24 +1034,27 @@
                    dot.style.borderColor = colorMap[color.name] || '#6b7280';
                 }
 
-                timelineView.appendChild(item);
+                DOMElements.timelineView.appendChild(item);
             });
         }
 
 
         function setupLayerControls() {
-            layerControl.innerHTML = '';
+            DOMElements.layerControl.innerHTML = '';
             COLORS.forEach(color => {
-                layerVisibility[color.name] = true;
+                if(layerVisibility[color.name] === undefined) {
+                    layerVisibility[color.name] = true;
+                }
                 const label = document.createElement('label');
-                label.innerHTML = `<input type="checkbox" data-color="${color.name}" checked> <span class="${color.tailwindClass}">${color.symbol}</span> ${color.name}`;
-                layerControl.appendChild(label);
+                label.innerHTML = `<input type="checkbox" data-color="${color.name}" ${layerVisibility[color.name] ? 'checked' : ''}> <span class="${color.tailwindClass}">${color.symbol}</span> ${color.name}`;
+                DOMElements.layerControl.appendChild(label);
             });
-            layerControl.addEventListener('change', (e) => {
+            DOMElements.layerControl.addEventListener('change', (e) => {
                 if (e.target.type === 'checkbox') {
                     const colorName = e.target.dataset.color;
                     layerVisibility[colorName] = e.target.checked;
                     updateLayerVisibility();
+                    triggerAutoSave();
                 }
             });
         }
@@ -973,16 +1068,16 @@
         }
 
         function setupTemplateModal() {
-            templateList.innerHTML = '';
+            DOMElements.templateList.innerHTML = '';
             for (const key in STRATEGIC_TEMPLATES) {
                 const template = STRATEGIC_TEMPLATES[key];
                 const btn = document.createElement('button');
                 btn.className = 'btn btn-secondary w-full text-left justify-start';
                 btn.innerHTML = `<div><div class="font-bold">${template.name}</div><div class="text-sm font-normal">${template.description}</div></div>`;
                 btn.onclick = () => {
-                    showMessage("Confirm Load Template", `This will clear the current canvas. Are you sure you want to load the "${template.name}" template?`, [ { text: 'Cancel', class: 'btn-secondary' }, { text: 'Load Template', class: 'btn-primary', action: () => { loadTemplate(template); hideModal(templatesModal); } } ]);
+                    showMessage("Confirm Load Template", `This will clear the current canvas. Are you sure you want to load the "${template.name}" template?`, [ { text: 'Cancel', class: 'btn-secondary' }, { text: 'Load Template', class: 'btn-primary', action: () => { loadTemplate(template); hideModal(DOMElements.templatesModal); } } ]);
                 };
-                templateList.appendChild(btn);
+                DOMElements.templateList.appendChild(btn);
             }
         }
         
@@ -1004,7 +1099,7 @@
             const templateWidth = maxX - minX;
             const templateHeight = maxY - minY;
 
-            const viewportRect = noteCanvasContainer.getBoundingClientRect();
+            const viewportRect = DOMElements.noteCanvasContainer.getBoundingClientRect();
             const viewportCenterX = (viewportRect.width / 2);
             const viewportCenterY = (viewportRect.height / 2);
             const worldCenter = screenToWorld(viewportCenterX, viewportCenterY);
@@ -1056,21 +1151,21 @@
             if (!transformUpdateQueued) {
                 transformUpdateQueued = true;
                 requestAnimationFrame(() => {
-                    transformContainer.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-                    svgCanvas.setAttribute('width', String(noteCanvas.scrollWidth));
-                    svgCanvas.setAttribute('height', String(noteCanvas.scrollHeight));
+                    DOMElements.transformContainer.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+                    DOMElements.svgCanvas.setAttribute('width', String(DOMElements.noteCanvas.scrollWidth));
+                    DOMElements.svgCanvas.setAttribute('height', String(DOMElements.noteCanvas.scrollHeight));
                     drawConnections();
                     updateGrid();
                     // Keep center marker at a constant size relative to the screen
-                    if (centerMarker) {
-                        centerMarker.style.transform = `translate(-50%, -50%) scale(${1 / scale})`;
+                    if (DOMElements.centerMarker) {
+                        DOMElements.centerMarker.style.transform = `translate(-50%, -50%) scale(${1 / scale})`;
                     }
                     transformUpdateQueued = false;
                 });
             }
         }
-        function resetAndCenterView() { scale = 1; const viewportWidth = noteCanvasContainer.clientWidth; const viewportHeight = noteCanvasContainer.clientHeight; const canvasContentWidth = noteCanvas.scrollWidth; const canvasContentHeight = noteCanvas.scrollHeight; translateX = (viewportWidth - canvasContentWidth * scale) / 2; translateY = (viewportHeight - canvasContentHeight * scale) / 2; applyTransform(); }
-        function screenToWorld(screenX, screenY) { const containerRect = noteCanvasContainer.getBoundingClientRect(); const rectLeft = containerRect.left || 0; const rectTop = containerRect.top || 0; const worldX = (screenX - rectLeft - translateX) / scale; const worldY = (screenY - rectTop - translateY) / scale; return { x: worldX, y: worldY }; }
+        function resetAndCenterView() { scale = 1; const viewportWidth = DOMElements.noteCanvasContainer.clientWidth; const viewportHeight = DOMElements.noteCanvasContainer.clientHeight; const canvasContentWidth = DOMElements.noteCanvas.scrollWidth; const canvasContentHeight = DOMElements.noteCanvas.scrollHeight; translateX = (viewportWidth - canvasContentWidth * scale) / 2; translateY = (viewportHeight - canvasContentHeight * scale) / 2; applyTransform(); triggerAutoSave(); }
+        function screenToWorld(screenX, screenY) { const containerRect = DOMElements.noteCanvasContainer.getBoundingClientRect(); const rectLeft = containerRect.left || 0; const rectTop = containerRect.top || 0; const worldX = (screenX - rectLeft - translateX) / scale; const worldY = (screenY - rectTop - translateY) / scale; return { x: worldX, y: worldY }; }
         function getPointerCoordinates(e) { if (e.touches && e.touches.length > 0) { return { x: e.touches[0].clientX, y: e.touches[0].clientY, count: e.touches.length }; } return { x: e.clientX, y: e.clientY, count: e.buttons === 1 ? 1 : 0 }; }
         
         function centerOnChunk(chunkId, setScaleToOne = true) {
@@ -1081,8 +1176,8 @@
                 scale = 1;
             }
 
-            const viewportWidth = noteCanvasContainer.clientWidth;
-            const viewportHeight = noteCanvasContainer.clientHeight;
+            const viewportWidth = DOMElements.noteCanvasContainer.clientWidth;
+            const viewportHeight = DOMElements.noteCanvasContainer.clientHeight;
 
             const chunkCenterX = chunkData.x + chunkData.width / 2;
             const chunkCenterY = chunkData.y + chunkData.height / 2;
@@ -1093,9 +1188,9 @@
             applyTransform();
         }
 
-        function loadApiKey() { const key = localStorage.getItem('geminiApiKey'); if (key) { geminiApiKey = key; geminiApiKeyInput.value = key; } }
+        function loadApiKey() { const key = localStorage.getItem('geminiApiKey'); if (key) { geminiApiKey = key; DOMElements.geminiApiKeyInput.value = key; } }
 		function saveApiKey() { 
-			const key = geminiApiKeyInput.value.trim(); 
+			const key = DOMElements.geminiApiKeyInput.value.trim(); 
 			if (key) { 
 				geminiApiKey = key; 
 				localStorage.setItem('geminiApiKey', key); 
@@ -1103,17 +1198,16 @@
 			} else { 
 				localStorage.removeItem('geminiApiKey'); 
 				geminiApiKey = null; 
-				// The showMessage call for clearing the key is removed.
 			} 
 		}        
         function loadDisplaySettings() {
             const gridSetting = localStorage.getItem('chorusShowGrid');
             showGrid = gridSetting === null ? true : JSON.parse(gridSetting);
-            gridToggle.checked = showGrid;
+            DOMElements.gridToggle.checked = showGrid;
             
             const markerSetting = localStorage.getItem('chorusShowCenterMarker');
             showCenterMarker = markerSetting === null ? false : JSON.parse(markerSetting);
-            centerMarkerToggle.checked = showCenterMarker;
+            DOMElements.centerMarkerToggle.checked = showCenterMarker;
             
             updateGrid();
             updateCenterMarkerDisplay();
@@ -1126,7 +1220,7 @@
 
         function updateGrid() {
             if (!showGrid) {
-                noteCanvasContainer.style.backgroundImage = '';
+                DOMElements.noteCanvasContainer.style.backgroundImage = '';
                 return;
             }
             
@@ -1147,47 +1241,48 @@
             
             if (isBlueprint && minorGridSize > 5) {
                 const minorColor = 'rgba(56, 189, 248, 0.1)';
-                noteCanvasContainer.style.backgroundImage = `
+                DOMElements.noteCanvasContainer.style.backgroundImage = `
                     linear-gradient(${gridColor} 1px, transparent 1px),
                     linear-gradient(to right, ${gridColor} 1px, transparent 1px),
                     linear-gradient(${minorColor} 1px, transparent 1px),
                     linear-gradient(to right, ${minorColor} 1px, transparent 1px)
                 `;
-                noteCanvasContainer.style.backgroundSize = `${majorGridSize}px ${majorGridSize}px, ${majorGridSize}px ${majorGridSize}px, ${minorGridSize}px ${minorGridSize}px, ${minorGridSize}px ${minorGridSize}px`;
-                noteCanvasContainer.style.backgroundPosition = `${translateX}px ${translateY}px, ${translateX}px ${translateY}px, ${translateX}px ${translateY}px, ${translateX}px ${translateY}px`;
+                DOMElements.noteCanvasContainer.style.backgroundSize = `${majorGridSize}px ${majorGridSize}px, ${majorGridSize}px ${majorGridSize}px, ${minorGridSize}px ${minorGridSize}px, ${minorGridSize}px ${minorGridSize}px`;
+                DOMElements.noteCanvasContainer.style.backgroundPosition = `${translateX % majorGridSize}px ${translateY % majorGridSize}px, ${translateX % majorGridSize}px ${translateY % majorGridSize}px, ${translateX % minorGridSize}px ${translateY % minorGridSize}px, ${translateX % minorGridSize}px ${translateY % minorGridSize}px`;
+
             } else {
-                noteCanvasContainer.style.backgroundImage = `
+                DOMElements.noteCanvasContainer.style.backgroundImage = `
                     linear-gradient(to right, ${gridColor} 1px, transparent 1px),
                     linear-gradient(to bottom, ${gridColor} 1px, transparent 1px)
                 `;
-                noteCanvasContainer.style.backgroundSize = `${majorGridSize}px ${majorGridSize}px`;
-                noteCanvasContainer.style.backgroundPosition = `${translateX}px ${translateY}px`;
+                DOMElements.noteCanvasContainer.style.backgroundSize = `${majorGridSize}px ${majorGridSize}px`;
+                DOMElements.noteCanvasContainer.style.backgroundPosition = `${translateX % majorGridSize}px ${translateY % majorGridSize}px`;
             }
 
              if (majorGridSize < 5) {
-                noteCanvasContainer.style.backgroundImage = 'none';
+                DOMElements.noteCanvasContainer.style.backgroundImage = 'none';
             }
         }
 
         function updateCenterMarkerDisplay() {
-            centerMarker.classList.toggle('hidden', !showCenterMarker);
+            DOMElements.centerMarker.classList.toggle('hidden', !showCenterMarker);
         }
 
-        async function callGemini(prompt, buttonToLoad) { if (!geminiApiKey) { showMessage("API Key Required", "Please enter your Google AI API key in the Settings modal first.", [ { text: 'Cancel', class: 'btn-secondary' }, { text: 'Open Settings', class: 'btn-primary', action: () => showModal(settingsModal) } ]); return null; } if (buttonToLoad) setButtonLoading(buttonToLoad, true); const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`; try { const response = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', }, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }), }); if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.error?.message || `HTTP error! status: ${response.status}`); } const data = await response.json(); if (data.candidates && data.candidates.length > 0 && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts.length > 0) { return data.candidates[0].content.parts[0].text; } else { if(data.candidates && data.candidates[0].finishReason === 'SAFETY') { throw new Error("The response was blocked due to safety settings. Please adjust your prompt."); } throw new Error("Received an empty or invalid response from the AI."); } } catch (error) { showMessage("AI Error", `An error occurred: ${error.message}`); console.error("Gemini API call failed:", error); return null; } finally { if (buttonToLoad) setButtonLoading(buttonToLoad, false); } }
-        function openAiModal(chunkId) { if (!geminiApiKey) { showMessage("API Key Required", "Please enter your Google AI API key in the Settings modal first.", [ { text: 'Cancel', class: 'btn-secondary' }, { text: 'Open Settings', class: 'btn-primary', action: () => showModal(settingsModal) } ]); return; } activeAiChunkId = chunkId; aiPromptTextarea.value = ''; showModal(aiActionModal); aiPromptTextarea.focus(); }
-        async function summarizeBoard() { if (chunks.length === 0) { showMessage("Empty Board", "There's nothing on the board to summarize."); return; } const allText = getCombinedTextForExport('txt'); const prompt = `Please provide a concise, high-level summary of the following strategic notes. Distill the main objectives, key assets and threats, and overall strategic direction. NOTES:\n${allText}`; const summary = await callGemini(prompt, summarizeBtn); if (summary) { const formattedSummary = summary.replace(/\n/g, '<br>'); showMessage("Board Summary", formattedSummary); } }
+        async function callGemini(prompt, buttonToLoad) { if (!geminiApiKey) { showMessage("API Key Required", "Please enter your Google AI API key in the Settings modal first.", [ { text: 'Cancel', class: 'btn-secondary' }, { text: 'Open Settings', class: 'btn-primary', action: () => showModal(DOMElements.settingsModal) } ]); return null; } if (buttonToLoad) setButtonLoading(buttonToLoad, true); const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`; try { const response = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', }, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }), }); if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.error?.message || `HTTP error! status: ${response.status}`); } const data = await response.json(); if (data.candidates && data.candidates.length > 0 && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts.length > 0) { return data.candidates[0].content.parts[0].text; } else { if(data.candidates && data.candidates[0].finishReason === 'SAFETY') { throw new Error("The response was blocked due to safety settings. Please adjust your prompt."); } throw new Error("Received an empty or invalid response from the AI."); } } catch (error) { showMessage("AI Error", `An error occurred: ${error.message}`); console.error("Gemini API call failed:", error); return null; } finally { if (buttonToLoad) setButtonLoading(buttonToLoad, false); } }
+        function openAiModal(chunkId) { if (!geminiApiKey) { showMessage("API Key Required", "Please enter your Google AI API key in the Settings modal first.", [ { text: 'Cancel', class: 'btn-secondary' }, { text: 'Open Settings', class: 'btn-primary', action: () => showModal(DOMElements.settingsModal) } ]); return; } activeAiChunkId = chunkId; DOMElements.aiPromptTextarea.value = ''; showModal(DOMElements.aiActionModal); DOMElements.aiPromptTextarea.focus(); }
+        async function summarizeBoard() { if (chunks.length === 0) { showMessage("Empty Board", "There's nothing on the board to summarize."); return; } const allText = getCombinedTextForExport('txt'); const prompt = `Please provide a concise, high-level summary of the following strategic notes. Distill the main objectives, key assets and threats, and overall strategic direction. NOTES:\n${allText}`; const summary = await callGemini(prompt, DOMElements.summarizeBtn); if (summary) { const formattedSummary = summary.replace(/\n/g, '<br>'); showMessage("Board Summary", formattedSummary); } }
         async function handleSuggestNextChunk() {
              const sourceChunkData = chunksMap.get(activeAiChunkId);
              if (!sourceChunkData) { showMessage("Error", "Could not find source chunk."); return; }
              const prompt = `Based on the following text from a strategic planning note, suggest the content for a new, subsequent note that logically follows it. Provide ONLY the text for the new note itself, without any introductory phrases. CONTEXT:\n${sourceChunkData.text}`;
-             const newText = await callGemini(prompt, aiActionSuggestNextBtn);
+             const newText = await callGemini(prompt, DOMElements.aiActionSuggestNextBtn);
              if (newText) {
                  const newChunkDetails = { type: allChunkTypesList.find(ct => ct.tag === "#action") || allChunkTypesList[0], shape: SHAPES.find(s => s.name === "Square") || SHAPES[0], color: COLORS.find(c => c.name === "Grey") || COLORS[0], };
                  const newChunkOptions = { text: `<p>${newText.replace(/\n/g, '<br>')}</p>`, x: sourceChunkData.x + sourceChunkData.width + 40, y: sourceChunkData.y };
                  const newChunkData = addChunkToCanvas(newChunkDetails, newChunkOptions);
                  addOrUpdateLink(sourceChunkData.id, newChunkData.id, 'Follow-on action', 'enables');
                  centerOnChunk(newChunkData.id, true);
-                 hideModal(aiActionModal);
+                 hideModal(DOMElements.aiActionModal);
                  showMessage("AI Suggestion", "A new chunk has been created and linked based on your previous note.");
              }
          }
@@ -1198,14 +1293,14 @@
                 showMessage("Error", "Could not find the chunk to edit.");
                 return;
             }
-            editingChunkIdInput.value = chunkId;
-            populateSelectWithOptions(editChunkTypeSelect, null, chunkData.chunkTypeTag, chunkTypes, key => key.charAt(0).toUpperCase() + key.slice(1) + " Types");
-            populateSelectWithOptions(editChunkShapeSelect, SHAPES.map(s => ({ value: s.name, text: `${s.symbol} ${s.name} - ${s.meaning}` })), chunkData.shapeName);
-            populateSelectWithOptions(editChunkColorSelect, COLORS.map(c => ({ value: c.name, text: `${c.symbol} ${c.name} - ${c.essence}` })), chunkData.colorName);
+            DOMElements.editingChunkIdInput.value = chunkId;
+            populateSelectWithOptions(DOMElements.editChunkTypeSelect, null, chunkData.chunkTypeTag, chunkTypes, key => key.charAt(0).toUpperCase() + key.slice(1) + " Types");
+            populateSelectWithOptions(DOMElements.editChunkShapeSelect, SHAPES.map(s => ({ value: s.name, text: `${s.symbol} ${s.name} - ${s.meaning}` })), chunkData.shapeName);
+            populateSelectWithOptions(DOMElements.editChunkColorSelect, COLORS.map(c => ({ value: c.name, text: `${c.symbol} ${c.name} - ${c.essence}` })), chunkData.colorName);
             const manageBtn = document.getElementById('manageLinksBtn');
-            manageBtn.onclick = () => { hideModal(editChunkModal); openUnlinkModal(chunkId); };
+            manageBtn.onclick = () => { hideModal(DOMElements.editChunkModal); openUnlinkModal(chunkId); };
             manageBtn.style.display = (chunkData.links && chunkData.links.length > 0) ? 'inline-flex' : 'none';
-            showModal(editChunkModal);
+            showModal(DOMElements.editChunkModal);
         }
 
         function updateChunkHeaderDisplay(chunkId) {
@@ -1300,11 +1395,12 @@
                     currentChunkData.text = content.innerHTML; 
                 }
                 debouncedPopulateChunkList();
+                triggerAutoSave();
             });
             content.addEventListener('focus', () => { highestZIndex++; chunkDiv.style.zIndex = String(highestZIndex); const currentChunkData = chunksMap.get(chunkDiv.id); if (currentChunkData) currentChunkData.zIndex = highestZIndex; if (!linkingMode) selectChunk(chunkData.id); });
             const resizeHandle = document.createElement('div'); resizeHandle.className = 'resize-handle'; resizeHandle.addEventListener('mousedown', onInteractionStart); resizeHandle.addEventListener('touchstart', onInteractionStart, { passive: false });
             chunkDiv.appendChild(header); chunkDiv.appendChild(content); chunkDiv.appendChild(resizeHandle);
-            noteCanvas.appendChild(chunkDiv);
+            DOMElements.noteCanvas.appendChild(chunkDiv);
             updateChunkHeaderDisplay(chunkData.id); updateSelectedVisuals();
             return chunkDiv;
         }
@@ -1319,23 +1415,24 @@
                         c.links = c.links.filter(link => link.targetId !== chunkId);
                     }
                 });
-                undoDeleteBtn.disabled = false;
+                DOMElements.undoDeleteBtn.disabled = false;
             }
             if (selectedChunkId === chunkId) deselectAllChunks();
             if (linkingSourceChunkId === chunkId) cancelLinkingMode(false);
             const chunkElement = document.getElementById(chunkId);
-            if (chunkElement) noteCanvas.removeChild(chunkElement);
+            if (chunkElement) DOMElements.noteCanvas.removeChild(chunkElement);
             drawConnections();
             updateChunkCounter();
             updateSelectedVisuals();
             populateChunkList();
+            triggerAutoSave();
         }
         function undoDeleteLastChunk() { 
             if (lastDeletedChunk) { 
                 if (chunksMap.has(lastDeletedChunk.id)) { 
                     showMessage("Undo Failed", "A chunk with the same ID already exists. Cannot undo."); 
                     lastDeletedChunk = null; 
-                    undoDeleteBtn.disabled = true; 
+                    DOMElements.undoDeleteBtn.disabled = true; 
                     return; 
                 } 
                 chunks.push(lastDeletedChunk); 
@@ -1344,16 +1441,17 @@
                 drawConnections(); 
                 selectChunk(lastDeletedChunk.id); 
                 lastDeletedChunk = null; 
-                undoDeleteBtn.disabled = true; 
+                DOMElements.undoDeleteBtn.disabled = true; 
                 showMessage("Undo Successful", "The last deleted chunk has been restored."); 
                 updateChunkCounter(); 
                 populateChunkList();
+                triggerAutoSave();
             } else { 
                 showMessage("Nothing to Undo", "No chunk deletion to undo."); 
             } 
         }
         function addChunkToCanvas(chunkDetails, options = {}) { 
-            const viewportRect = noteCanvasContainer.getBoundingClientRect(); 
+            const viewportRect = DOMElements.noteCanvasContainer.getBoundingClientRect(); 
             const defaultWorldPos = screenToWorld( (viewportRect.left || 0) + (viewportRect.width || window.innerWidth) / 2, (viewportRect.top || 0) + (viewportRect.height || window.innerHeight) / 4 ); 
             const newChunkData = { 
                 id: generateId(), 
@@ -1378,6 +1476,7 @@
             drawConnections(); 
             updateChunkCounter(); 
             populateChunkList();
+            triggerAutoSave();
             return newChunkData; 
         }
 
@@ -1401,16 +1500,17 @@
             }
             drawConnections();
             updateSelectedVisuals();
+            triggerAutoSave();
         }
 
         function getIntersectionPointWithRect(rect, internalPoint, externalPoint) { const p1 = internalPoint; const p2 = externalPoint; const dx = p2.x - p1.x; const dy = p2.y - p1.y; if (dx === 0 && dy === 0) return p1; let tMin = Infinity; let intersection = null; const rectRight = rect.x + rect.width; const rectBottom = rect.y + rect.height; if (dx !== 0) { const t = (rect.x - p1.x) / dx; if (t > 1e-6) { const y = p1.y + t * dy; if (y >= rect.y && y <= rectBottom) { if (t < tMin) { tMin = t; intersection = { x: rect.x, y: y }; } } } } if (dx !== 0) { const t = (rectRight - p1.x) / dx; if (t > 1e-6) { const y = p1.y + t * dy; if (y >= rect.y && y <= rectBottom) { if (t < tMin) { tMin = t; intersection = { x: rectRight, y: y }; } } } } if (dy !== 0) { const t = (rect.y - p1.y) / dy; if (t > 1e-6) { const x = p1.x + t * dx; if (x >= rect.x && x <= rectRight) { if (t < tMin) { tMin = t; intersection = { x: x, y: rect.y }; } } } } if (dy !== 0) { const t = (rectBottom - p1.y) / dy; if (t > 1e-6) { const x = p1.x + t * dx; if (x >= rect.x && x <= rectRight) { if (t < tMin) { tMin = t; intersection = { x: x, y: rectBottom }; } } } } return intersection || p1; }
         let svgDefsCreated = false;
-        function ensureSvgDefs() { if (svgDefsCreated) return; const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs'); const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker'); marker.setAttribute('id', 'arrowhead'); marker.setAttribute('viewBox', '0 0 10 10'); marker.setAttribute('refX', '10'); marker.setAttribute('refY', '5'); marker.setAttribute('markerUnits', 'strokeWidth'); marker.setAttribute('markerWidth', '6'); marker.setAttribute('markerHeight', '5'); marker.setAttribute('orient', 'auto'); const path = document.createElementNS('http://www.w3.org/2000/svg', 'path'); path.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z'); path.classList.add('arrow-head'); marker.appendChild(path); defs.appendChild(marker); svgCanvas.appendChild(defs); svgDefsCreated = true; }
+        function ensureSvgDefs() { if (svgDefsCreated) return; const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs'); const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker'); marker.setAttribute('id', 'arrowhead'); marker.setAttribute('viewBox', '0 0 10 10'); marker.setAttribute('refX', '10'); marker.setAttribute('refY', '5'); marker.setAttribute('markerUnits', 'strokeWidth'); marker.setAttribute('markerWidth', '6'); marker.setAttribute('markerHeight', '5'); marker.setAttribute('orient', 'auto'); const path = document.createElementNS('http://www.w3.org/2000/svg', 'path'); path.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z'); path.classList.add('arrow-head'); marker.appendChild(path); defs.appendChild(marker); DOMElements.svgCanvas.appendChild(defs); svgDefsCreated = true; }
         
         function drawConnections() {
             ensureSvgDefs();
-            const children = Array.from(svgCanvas.children);
-            children.forEach(child => { if (child.tagName.toLowerCase() !== 'defs') { svgCanvas.removeChild(child); } });
+            const children = Array.from(DOMElements.svgCanvas.children);
+            children.forEach(child => { if (child.tagName.toLowerCase() !== 'defs') { DOMElements.svgCanvas.removeChild(child); } });
             
             chunks.forEach(sourceChunkData => {
                 if (sourceChunkData.links && sourceChunkData.links.length > 0) {
@@ -1441,7 +1541,7 @@
                         line.classList.add(`link-type-${link.type || 'enables'}`);
                         line.setAttribute('marker-end', 'url(#arrowhead)');
                         line.classList.toggle('hidden-by-layer', !isSourceVisible || !isTargetVisible);
-                        svgCanvas.appendChild(line);
+                        DOMElements.svgCanvas.appendChild(line);
 
                         if (link.label) {
                             const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
@@ -1453,8 +1553,8 @@
                             const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
                             rect.classList.add('link-label-bg');
                             
-                            svgCanvas.appendChild(rect);
-                            svgCanvas.appendChild(text);
+                            DOMElements.svgCanvas.appendChild(rect);
+                            DOMElements.svgCanvas.appendChild(text);
 
                             try {
                                 const bbox = text.getBBox();
@@ -1476,17 +1576,17 @@
             const sourceChunk = chunksMap.get(sourceId);
             if (!sourceChunk) return;
 
-            linkSourceIdInput.value = sourceId;
-            linkTargetIdInput.value = targetId;
-            linkLabelInput.value = label;
+            DOMElements.linkSourceIdInput.value = sourceId;
+            DOMElements.linkTargetIdInput.value = targetId;
+            DOMElements.linkLabelInput.value = label;
             
-            populateSelectWithOptions(linkTypeSelect, LINK_TYPES.map(l => ({value: l.type, text: l.label})), linkType);
+            populateSelectWithOptions(DOMElements.linkTypeSelect, LINK_TYPES.map(l => ({value: l.type, text: l.label})), linkType);
 
             const existingLink = sourceChunk.links.find(l => l.targetId === targetId);
-            linkEditTitle.textContent = existingLink ? 'Edit Relationship' : 'Create Relationship';
-            confirmLinkEditBtn.textContent = existingLink ? 'Save Changes' : 'Create Link';
+            DOMElements.linkEditTitle.textContent = existingLink ? 'Edit Relationship' : 'Create Relationship';
+            DOMElements.confirmLinkEditBtn.textContent = existingLink ? 'Save Changes' : 'Create Link';
             
-            showModal(linkEditModal);
+            showModal(DOMElements.linkEditModal);
         }
 
         function openUnlinkModal(sourceId) {
@@ -1495,7 +1595,7 @@
                 showMessage("No Relationships", "This chunk has no outgoing relationships to manage.");
                 return;
             }
-            unlinkList.innerHTML = '';
+            DOMElements.unlinkList.innerHTML = '';
             sourceChunk.links.forEach(link => {
                 const targetChunk = chunksMap.get(link.targetId);
                 if (targetChunk) {
@@ -1512,7 +1612,7 @@
                     editBtn.className = 'btn btn-secondary btn-sm !m-0 mr-2';
                     editBtn.textContent = 'Edit';
                     editBtn.onclick = () => {
-                         hideModal(unlinkModal);
+                         hideModal(DOMElements.unlinkModal);
                          openLinkEditor(sourceId, link.targetId, link.label, link.type);
                     };
 
@@ -1524,23 +1624,24 @@
                         item.remove();
                         drawConnections();
                         updateSelectedVisuals();
+                        triggerAutoSave();
                         if (sourceChunk.links.length === 0) {
-                            hideModal(unlinkModal);
+                            hideModal(DOMElements.unlinkModal);
                         }
                     };
 
                     btnGroup.appendChild(editBtn);
                     btnGroup.appendChild(removeBtn);
                     item.appendChild(btnGroup);
-                    unlinkList.appendChild(item);
+                    DOMElements.unlinkList.appendChild(item);
                 }
             });
-            showModal(unlinkModal);
+            showModal(DOMElements.unlinkModal);
         }
-
+        let draggedChunk, resizingChunk, interactionMoveQueued, startX, startY, interactionStartX, interactionStartY, startWidth, startHeight, offsetX, offsetY;
+        
         function onInteractionStart(e) {
             if (linkingMode) return;
-
             const isTouchEvent = e.type.startsWith('touch');
             if (isTouchEvent && e.touches.length > 1) return;
             if (isTouchEvent) e.preventDefault();
@@ -1583,7 +1684,6 @@
                 document.addEventListener('touchend', onInteractionEnd);
             }
         }
-        let interactionMoveQueued = false;
         
         function onInteractionMove(e) {
             const isTouchEvent = e.type.startsWith('touch');
@@ -1600,8 +1700,8 @@
                     let newWorldX = worldPointer.x - offsetX;
                     let newWorldY = worldPointer.y - offsetY;
                     
-                    const canvasWorldWidth = noteCanvas.scrollWidth;
-                    const canvasWorldHeight = noteCanvas.scrollHeight;
+                    const canvasWorldWidth = DOMElements.noteCanvas.scrollWidth;
+                    const canvasWorldHeight = DOMElements.noteCanvas.scrollHeight;
                     const chunkWidth = parseFloat(draggedChunk.style.width);
                     const chunkHeight = parseFloat(draggedChunk.style.height);
 
@@ -1623,8 +1723,8 @@
                     
                     const chunkCurrentX = parseFloat(resizingChunk.style.left);
                     const chunkCurrentY = parseFloat(resizingChunk.style.top);
-                    const canvasWorldWidth = noteCanvas.scrollWidth;
-                    const canvasWorldHeight = noteCanvas.scrollHeight;
+                    const canvasWorldWidth = DOMElements.noteCanvas.scrollWidth;
+                    const canvasWorldHeight = DOMElements.noteCanvas.scrollHeight;
 
                     if (chunkCurrentX + newWidth > canvasWorldWidth) {
                         newWidth = canvasWorldWidth - chunkCurrentX;
@@ -1647,7 +1747,19 @@
             });
         }
 
-        function onInteractionEnd(e) { if (currentAction === 'drag' && draggedChunk) { const chunkData = chunksMap.get(draggedChunk.id); if (chunkData) { chunkData.x = parseFloat(draggedChunk.style.left); chunkData.y = parseFloat(draggedChunk.style.top); } draggedChunk = null; } else if (currentAction === 'resize' && resizingChunk) { const chunkData = chunksMap.get(resizingChunk.id); if (chunkData) { chunkData.width = parseFloat(resizingChunk.style.width); chunkData.height = parseFloat(resizingChunk.style.height); } resizingChunk = null; } else if (currentAction === 'pan') { noteCanvasContainer.classList.remove('panning'); } if (currentAction !== 'pinch-zoom') { currentAction = null; } document.removeEventListener('mousemove', onInteractionMove); document.removeEventListener('mouseup', onInteractionEnd); document.removeEventListener('touchmove', onInteractionMove); document.removeEventListener('touchend', onInteractionEnd); }
+        function onInteractionEnd(e) { 
+            let stateChanged = false;
+            if (currentAction === 'drag' && draggedChunk) { const chunkData = chunksMap.get(draggedChunk.id); if (chunkData) { chunkData.x = parseFloat(draggedChunk.style.left); chunkData.y = parseFloat(draggedChunk.style.top); } draggedChunk = null; stateChanged = true; } 
+            else if (currentAction === 'resize' && resizingChunk) { const chunkData = chunksMap.get(resizingChunk.id); if (chunkData) { chunkData.width = parseFloat(resizingChunk.style.width); chunkData.height = parseFloat(resizingChunk.style.height); } resizingChunk = null; stateChanged = true; } 
+            else if (currentAction === 'pan') { DOMElements.noteCanvasContainer.classList.remove('panning'); stateChanged = true; } 
+            
+            if (stateChanged) {
+                triggerAutoSave();
+            }
+
+            if (currentAction !== 'pinch-zoom') { currentAction = null; } 
+            document.removeEventListener('mousemove', onInteractionMove); document.removeEventListener('mouseup', onInteractionEnd); document.removeEventListener('touchmove', onInteractionMove); document.removeEventListener('touchend', onInteractionEnd); 
+        }
         
         function getCombinedTextForExport(format) {
             const tempDiv = document.createElement('div');
@@ -1764,7 +1876,7 @@
             return output;
         }
 
-        function saveDataToFile() { chunks.forEach(chunkData => { const chunkElement = document.getElementById(chunkData.id); if (chunkElement) { const contentDiv = chunkElement.querySelector('.chunk-content'); if (contentDiv) { chunkData.text = contentDiv.innerHTML; } } }); if (chunks.length === 0) { showMessage("Empty Board", "There are no notes to save."); return; } setButtonLoading(saveBtn, true); try { const dataToSave = { chunks: chunks, viewport: { scale: scale, translateX: translateX, translateY: translateY } }; const dataStr = JSON.stringify(dataToSave, null, 2); downloadFile(dataStr, 'chorus-strategist-map.json', 'application/json'); showMessage('Saved to File', 'Your board has been prepared for download.'); } catch (error) { showMessage('Save Error', `Could not prepare data for saving: ${error.message}`); console.error("Save error:", error); } finally { setButtonLoading(saveBtn, false); } }
+        function saveDataToFile() { chunks.forEach(chunkData => { const chunkElement = document.getElementById(chunkData.id); if (chunkElement) { const contentDiv = chunkElement.querySelector('.chunk-content'); if (contentDiv) { chunkData.text = contentDiv.innerHTML; } } }); if (chunks.length === 0) { showMessage("Empty Board", "There are no notes to save."); return; } setButtonLoading(DOMElements.saveBtn, true); try { const dataToSave = { chunks: chunks, viewport: { scale: scale, translateX: translateX, translateY: translateY } }; const dataStr = JSON.stringify(dataToSave, null, 2); downloadFile(dataStr, 'chorus-strategist-map.json', 'application/json'); showMessage('Saved to File', 'Your board has been prepared for download.'); } catch (error) { showMessage('Save Error', `Could not prepare data for saving: ${error.message}`); console.error("Save error:", error); } finally { setButtonLoading(DOMElements.saveBtn, false); } }
         
         function saveAsTemplate() {
             if (chunks.length === 0) {
@@ -1822,8 +1934,8 @@
         function downloadFile(content, fileName, contentType) { const a = document.createElement('a'); const file = new Blob([content], {type: contentType}); a.href = URL.createObjectURL(file); a.download = fileName; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(a.href); }
         
         function renderBoard(loadedChunksData) {
-            const existingChunkElements = noteCanvas.querySelectorAll('.chorus-chunk'); existingChunkElements.forEach(el => el.remove());
-            chunks = loadedChunksData || []; chunksMap.clear(); highestZIndex = 0; selectedChunkId = null; lastDeletedChunk = null; undoDeleteBtn.disabled = true; cancelLinkingMode(true);
+            const existingChunkElements = DOMElements.noteCanvas.querySelectorAll('.chorus-chunk'); existingChunkElements.forEach(el => el.remove());
+            chunks = loadedChunksData || []; chunksMap.clear(); highestZIndex = 0; selectedChunkId = null; lastDeletedChunk = null; DOMElements.undoDeleteBtn.disabled = true; cancelLinkingMode(true);
             if (Array.isArray(chunks)) { 
                 chunks.forEach(chunkData => { 
                     if (chunkData.nextChunkIds && Array.isArray(chunkData.nextChunkIds)) {
@@ -1847,6 +1959,7 @@
             updateChunkCounter(); 
             updateLayerVisibility();
             populateChunkList();
+            triggerAutoSave();
         }
 
         const originalButtonStates = {};
@@ -1887,13 +2000,13 @@
         const debouncedPopulateChunkList = debounce(() => populateChunkList(), 500);
 
         function populateChunkList() {
-            chunkListDropdown.innerHTML = ''; 
+            DOMElements.chunkListDropdown.innerHTML = ''; 
 
             if (chunks.length === 0) {
                 const noChunksItem = document.createElement('div');
                 noChunksItem.className = 'px-4 py-2 text-sm text-[var(--text-secondary)]';
                 noChunksItem.textContent = 'No chunks on canvas.';
-                chunkListDropdown.appendChild(noChunksItem);
+                DOMElements.chunkListDropdown.appendChild(noChunksItem);
                 return;
             }
 
@@ -1930,9 +2043,9 @@
                 
                 listItem.addEventListener('click', () => {
                     centerOnChunk(chunk.id, false); 
-                    chunkListDropdown.classList.remove('show');
+                    DOMElements.chunkListDropdown.classList.remove('show');
                 });
-                chunkListDropdown.appendChild(listItem);
+                DOMElements.chunkListDropdown.appendChild(listItem);
             });
         }
 
@@ -1950,18 +2063,17 @@
             populateAddChunkModal();
             setupDropdowns();
             setupThemeSelector();
-            renderBoard([]);
             
             // Toolbar
-            addChunkBtn.addEventListener('click', () => { if(linkingMode) cancelLinkingMode(false); showModal(addChunkModal); });
-            templatesBtn.addEventListener('click', () => showModal(templatesModal));
-            clearCanvasBtn.addEventListener('click', () => { if (linkingMode) cancelLinkingMode(false); if (chunks.length === 0) { showMessage("Canvas Empty", "The canvas is already clear."); return; } showMessage("Confirm Clear", "Are you sure you want to clear the entire canvas? This action cannot be undone.", [ { text: 'Cancel', class: 'btn-secondary' }, { text: 'Clear Canvas', class: 'btn-danger', action: () => { renderBoard([]); populateChunkList(); showMessage("Canvas Cleared", "All notes and links have been removed."); }} ]); });
-            undoDeleteBtn.addEventListener('click', () => { if (linkingMode) cancelLinkingMode(false); undoDeleteLastChunk(); });
-            summarizeBtn.addEventListener('click', summarizeBoard);
-            viewToggleBtn.addEventListener('click', toggleView);
+            DOMElements.addChunkBtn.addEventListener('click', () => { if(linkingMode) cancelLinkingMode(false); showModal(DOMElements.addChunkModal); });
+            DOMElements.templatesBtn.addEventListener('click', () => showModal(DOMElements.templatesModal));
+            DOMElements.clearCanvasBtn.addEventListener('click', () => { if (linkingMode) cancelLinkingMode(false); if (chunks.length === 0) { showMessage("Canvas Empty", "The canvas is already clear."); return; } showMessage("Confirm Clear", "Are you sure you want to clear the entire canvas? This action cannot be undone.", [ { text: 'Cancel', class: 'btn-secondary' }, { text: 'Clear Canvas', class: 'btn-danger', action: () => { renderBoard([]); populateChunkList(); clearAutoSave(); showMessage("Canvas Cleared", "All notes and links have been removed."); }} ]); });
+            DOMElements.undoDeleteBtn.addEventListener('click', () => { if (linkingMode) cancelLinkingMode(false); undoDeleteLastChunk(); });
+            DOMElements.summarizeBtn.addEventListener('click', summarizeBoard);
+            DOMElements.viewToggleBtn.addEventListener('click', toggleView);
             
-            zoomInBtn.addEventListener('click', () => {
-                const rect = noteCanvasContainer.getBoundingClientRect();
+            DOMElements.zoomInBtn.addEventListener('click', () => {
+                const rect = DOMElements.noteCanvasContainer.getBoundingClientRect();
                 const centerXRelative = rect.width / 2;
                 const centerYRelative = rect.height / 2;
                 const worldXBeforeZoom = (centerXRelative - translateX) / scale;
@@ -1971,9 +2083,10 @@
                 translateY = centerYRelative - worldYBeforeZoom * newScale;
                 scale = newScale;
                 applyTransform();
+                triggerAutoSave();
             });
-            zoomOutBtn.addEventListener('click', () => {
-                const rect = noteCanvasContainer.getBoundingClientRect();
+            DOMElements.zoomOutBtn.addEventListener('click', () => {
+                const rect = DOMElements.noteCanvasContainer.getBoundingClientRect();
                 const centerXRelative = rect.width / 2;
                 const centerYRelative = rect.height / 2;
                 const worldXBeforeZoom = (centerXRelative - translateX) / scale;
@@ -1983,81 +2096,82 @@
                 translateY = centerYRelative - worldYBeforeZoom * newScale;
                 scale = newScale;
                 applyTransform();
+                triggerAutoSave();
             });
 
-            zoomResetBtn.addEventListener('click', resetAndCenterView);
-            saveBtn.addEventListener('click', saveDataToFile);
-            loadBtn.addEventListener('click', () => { if(linkingMode) cancelLinkingMode(false); if (chunks.length > 0) { showMessage("Confirm Load", "Loading a new file will clear any unsaved changes on the current canvas. Are you sure you want to proceed?", [ { text: 'Cancel', class: 'btn-secondary' }, { text: 'Load File', class: 'btn-primary', action: () => fileLoadInput.click() } ]); } else { fileLoadInput.click(); } });
-            settingsBtn.addEventListener('click', () => showModal(settingsModal));
-            helpBtn.addEventListener('click', () => { if(linkingMode) cancelLinkingMode(false); showModal(helpModal); });
-            donateBtn.addEventListener('click', () => showModal(supportModal));
+            DOMElements.zoomResetBtn.addEventListener('click', resetAndCenterView);
+            DOMElements.saveBtn.addEventListener('click', saveDataToFile);
+            DOMElements.loadBtn.addEventListener('click', () => { if(linkingMode) cancelLinkingMode(false); if (chunks.length > 0) { showMessage("Confirm Load", "Loading a new file will clear any unsaved changes on the current canvas. Are you sure you want to proceed?", [ { text: 'Cancel', class: 'btn-secondary' }, { text: 'Load File', class: 'btn-primary', action: () => DOMElements.fileLoadInput.click() } ]); } else { DOMElements.fileLoadInput.click(); } });
+            DOMElements.settingsBtn.addEventListener('click', () => showModal(DOMElements.settingsModal));
+            DOMElements.helpBtn.addEventListener('click', () => { if(linkingMode) cancelLinkingMode(false); showModal(DOMElements.helpModal); });
+            DOMElements.donateBtn.addEventListener('click', () => showModal(DOMElements.supportModal));
             
             // Export Button Events
-            exportTxtBtn.addEventListener('click', () => {
+            DOMElements.exportTxtBtn.addEventListener('click', () => {
                 downloadFile(getCombinedTextForExport('txt'), 'chorus-export.txt', 'text/plain;charset=utf-8');
                 document.querySelectorAll('.dropdown-content.show').forEach(openContent => openContent.classList.remove('show'));
             });
-            exportMdBtn.addEventListener('click', () => {
+            DOMElements.exportMdBtn.addEventListener('click', () => {
                 downloadFile(getCombinedTextForExport('md'), 'chorus-export.md', 'text/markdown;charset=utf-8');
                 document.querySelectorAll('.dropdown-content.show').forEach(openContent => openContent.classList.remove('show'));
             });
-            exportHtmlBtn.addEventListener('click', () => {
+            DOMElements.exportHtmlBtn.addEventListener('click', () => {
                 downloadFile(getCombinedTextForExport('html'), 'chorus-export.html', 'text/html;charset=utf-8');
                 document.querySelectorAll('.dropdown-content.show').forEach(openContent => openContent.classList.remove('show'));
             });
-            exportJsonBtn.addEventListener('click', () => {
+            DOMElements.exportJsonBtn.addEventListener('click', () => {
                 const dataToSave = { chunks: chunks, viewport: { scale: scale, translateX: translateX, translateY: translateY } };
                 downloadFile(JSON.stringify(dataToSave, null, 2), 'chorus-export.json', 'application/json');
                 document.querySelectorAll('.dropdown-content.show').forEach(openContent => openContent.classList.remove('show'));
             });
-            exportCsvBtn.addEventListener('click', () => {
+            DOMElements.exportCsvBtn.addEventListener('click', () => {
                 downloadFile(getCombinedTextForExport('csv'), 'chorus-export.csv', 'text/csv;charset=utf-8');
                 document.querySelectorAll('.dropdown-content.show').forEach(openContent => openContent.classList.remove('show'));
             });
 
             // Custom Template Button Events
-            saveAsTemplateBtn.addEventListener('click', saveAsTemplate);
-            loadCustomTemplateBtn.addEventListener('click', () => customTemplateLoadInput.click());
+            DOMElements.saveAsTemplateBtn.addEventListener('click', saveAsTemplate);
+            DOMElements.loadCustomTemplateBtn.addEventListener('click', () => DOMElements.customTemplateLoadInput.click());
             
             // Modals
-            cancelAddChunkBtn.addEventListener('click', () => hideModal(addChunkModal));
-            confirmAddChunkBtn.addEventListener('click', () => { 
-                const selectedType = allChunkTypesList.find(ct => ct.tag === chunkTypeSelect.value); 
-                const selectedShape = SHAPES.find(s => s.name === chunkShapeSelect.value); 
-                const selectedColor = COLORS.find(c => c.name === chunkColorSelect.value); 
+            DOMElements.cancelAddChunkBtn.addEventListener('click', () => hideModal(DOMElements.addChunkModal));
+            DOMElements.confirmAddChunkBtn.addEventListener('click', () => { 
+                const selectedType = allChunkTypesList.find(ct => ct.tag === DOMElements.chunkTypeSelect.value); 
+                const selectedShape = SHAPES.find(s => s.name === DOMElements.chunkShapeSelect.value); 
+                const selectedColor = COLORS.find(c => c.name === DOMElements.chunkColorSelect.value); 
                 if (!selectedType || !selectedShape || !selectedColor) { 
                     showMessage('Error', 'Please make a selection for all properties.'); 
                     return; 
                 } 
                 const newChunkData = addChunkToCanvas({ type: selectedType, shape: selectedShape, color: selectedColor }); 
                 centerOnChunk(newChunkData.id, true);
-                hideModal(addChunkModal); 
+                hideModal(DOMElements.addChunkModal); 
             });
-            cancelEditChunkBtn.addEventListener('click', () => hideModal(editChunkModal));
-            confirmEditChunkBtn.addEventListener('click', () => { const chunkId = editingChunkIdInput.value; const chunkData = chunksMap.get(chunkId); if (!chunkData) return; const newType = allChunkTypesList.find(ct => ct.tag === editChunkTypeSelect.value); const newShape = SHAPES.find(s => s.name === editChunkShapeSelect.value); const newColor = COLORS.find(c => c.name === editChunkColorSelect.value); if (!newType || !newShape || !newColor) { showMessage('Error', 'Invalid selection.'); return; } chunkData.chunkTypeTag = newType.tag; chunkData.shapeName = newShape.name; chunkData.shapeSymbol = newShape.symbol; chunkData.colorName = newColor.name; chunkData.colorSymbol = newColor.symbol; chunkData.colorTailwindClass = newColor.tailwindClass; updateChunkHeaderDisplay(chunkId); hideModal(editChunkModal); updateSelectedVisuals(); updateLayerVisibility(); drawConnections(); populateChunkList(); });
-            cancelSettingsBtn.addEventListener('click', () => hideModal(settingsModal));
-            closeSettingsModalBtn.addEventListener('click', () => hideModal(settingsModal));
-            saveSettingsBtn.addEventListener('click', () => { saveApiKey(); saveCustomChunkTypes(); saveDisplaySettings(); hideModal(settingsModal); });
-            addCustomTypeForm.addEventListener('submit', (e) => { e.preventDefault(); const tag = customTypeTagInput.value.trim(); const desc = customTypeDescInput.value.trim(); if (!tag.startsWith('#') || tag.length < 2 || !desc) { showMessage("Invalid Input", "Custom types must start with # and have a description."); return; } if(allChunkTypesList.some(t => t.tag === tag)){ showMessage("Duplicate Tag", "A chunk type with this tag already exists."); return; } if(!chunkTypes.custom) chunkTypes.custom = []; chunkTypes.custom.push({ tag, description: desc }); saveCustomChunkTypes(); customTypeTagInput.value = ''; customTypeDescInput.value = ''; });
-            cancelAiActionBtn.addEventListener('click', () => hideModal(aiActionModal));
-            closeAiActionModalBtn.addEventListener('click', () => hideModal(aiActionModal));
-            aiActionSuggestNextBtn.addEventListener('click', handleSuggestNextChunk);
-            aiActionGenerateBtn.addEventListener('click', async () => { const promptText = aiPromptTextarea.value.trim(); if (!promptText) { showMessage("Prompt Required", "Please enter a prompt for the AI."); return; } const chunkData = chunksMap.get(activeAiChunkId); if (!chunkData) { showMessage("Error", "Could not find the active chunk."); return; } const contentDiv = document.getElementById(activeAiChunkId)?.querySelector('.chunk-content'); if(!contentDiv) return; const fullPrompt = `CONTEXT:\n${contentDiv.innerText}\n\nPROMPT:\n${promptText}\n\nINSTRUCTIONS: Respond with only the generated text, without any introductory phrases or markdown.`; const result = await callGemini(fullPrompt, aiActionGenerateBtn); if (result !== null) { let htmlResult = result.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>'); htmlResult = `<p>${htmlResult}</p>`; contentDiv.innerHTML = htmlResult; chunkData.text = htmlResult; hideModal(aiActionModal); showMessage("Content Updated", "The chunk content has been updated by the AI."); } });
-            closeHelpBtn.addEventListener('click', () => hideModal(helpModal));
-            closeHelpModalSpan.addEventListener('click', () => hideModal(helpModal));
-            closeUnlinkModalBtn.addEventListener('click', () => hideModal(unlinkModal));
+            DOMElements.cancelEditChunkBtn.addEventListener('click', () => hideModal(DOMElements.editChunkModal));
+            DOMElements.confirmEditChunkBtn.addEventListener('click', () => { const chunkId = DOMElements.editingChunkIdInput.value; const chunkData = chunksMap.get(chunkId); if (!chunkData) return; const newType = allChunkTypesList.find(ct => ct.tag === DOMElements.editChunkTypeSelect.value); const newShape = SHAPES.find(s => s.name === DOMElements.editChunkShapeSelect.value); const newColor = COLORS.find(c => c.name === DOMElements.editChunkColorSelect.value); if (!newType || !newShape || !newColor) { showMessage('Error', 'Invalid selection.'); return; } chunkData.chunkTypeTag = newType.tag; chunkData.shapeName = newShape.name; chunkData.shapeSymbol = newShape.symbol; chunkData.colorName = newColor.name; chunkData.colorSymbol = newColor.symbol; chunkData.colorTailwindClass = newColor.tailwindClass; updateChunkHeaderDisplay(chunkId); hideModal(DOMElements.editChunkModal); updateSelectedVisuals(); updateLayerVisibility(); drawConnections(); populateChunkList(); triggerAutoSave(); });
+            DOMElements.cancelSettingsBtn.addEventListener('click', () => hideModal(DOMElements.settingsModal));
+            DOMElements.closeSettingsModalBtn.addEventListener('click', () => hideModal(DOMElements.settingsModal));
+            DOMElements.saveSettingsBtn.addEventListener('click', () => { saveApiKey(); saveCustomChunkTypes(); saveDisplaySettings(); hideModal(DOMElements.settingsModal); });
+            DOMElements.addCustomTypeForm.addEventListener('submit', (e) => { e.preventDefault(); const tag = DOMElements.customTypeTagInput.value.trim(); const desc = DOMElements.customTypeDescInput.value.trim(); if (!tag.startsWith('#') || tag.length < 2 || !desc) { showMessage("Invalid Input", "Custom types must start with # and have a description."); return; } if(allChunkTypesList.some(t => t.tag === tag)){ showMessage("Duplicate Tag", "A chunk type with this tag already exists."); return; } if(!chunkTypes.custom) chunkTypes.custom = []; chunkTypes.custom.push({ tag, description: desc }); saveCustomChunkTypes(); DOMElements.customTypeTagInput.value = ''; DOMElements.customTypeDescInput.value = ''; });
+            DOMElements.cancelAiActionBtn.addEventListener('click', () => hideModal(DOMElements.aiActionModal));
+            DOMElements.closeAiActionModalBtn.addEventListener('click', () => hideModal(DOMElements.aiActionModal));
+            DOMElements.aiActionSuggestNextBtn.addEventListener('click', handleSuggestNextChunk);
+            DOMElements.aiActionGenerateBtn.addEventListener('click', async () => { const promptText = DOMElements.aiPromptTextarea.value.trim(); if (!promptText) { showMessage("Prompt Required", "Please enter a prompt for the AI."); return; } const chunkData = chunksMap.get(activeAiChunkId); if (!chunkData) { showMessage("Error", "Could not find the active chunk."); return; } const contentDiv = document.getElementById(activeAiChunkId)?.querySelector('.chunk-content'); if(!contentDiv) return; const fullPrompt = `CONTEXT:\n${contentDiv.innerText}\n\nPROMPT:\n${promptText}\n\nINSTRUCTIONS: Respond with only the generated text, without any introductory phrases or markdown.`; const result = await callGemini(fullPrompt, DOMElements.aiActionGenerateBtn); if (result !== null) { let htmlResult = result.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>'); htmlResult = `<p>${htmlResult}</p>`; contentDiv.innerHTML = htmlResult; chunkData.text = htmlResult; hideModal(DOMElements.aiActionModal); showMessage("Content Updated", "The chunk content has been updated by the AI."); triggerAutoSave(); } });
+            DOMElements.closeHelpBtn.addEventListener('click', () => hideModal(DOMElements.helpModal));
+            DOMElements.closeHelpModalSpan.addEventListener('click', () => hideModal(DOMElements.helpModal));
+            DOMElements.closeUnlinkModalBtn.addEventListener('click', () => hideModal(DOMElements.unlinkModal));
             
-            gridToggle.addEventListener('change', () => { showGrid = gridToggle.checked; updateGrid(); });
-            centerMarkerToggle.addEventListener('change', () => { showCenterMarker = centerMarkerToggle.checked; updateCenterMarkerDisplay(); });
+            DOMElements.gridToggle.addEventListener('change', () => { showGrid = DOMElements.gridToggle.checked; updateGrid(); });
+            DOMElements.centerMarkerToggle.addEventListener('change', () => { showCenterMarker = DOMElements.centerMarkerToggle.checked; updateCenterMarkerDisplay(); });
 
-            cancelLinkEditBtn.addEventListener('click', () => { hideModal(linkEditModal); cancelLinkingMode(false); });
-            confirmLinkEditBtn.addEventListener('click', () => {
-                const sourceId = linkSourceIdInput.value;
-                const targetId = linkTargetIdInput.value;
-                const label = linkLabelInput.value;
-                const type = linkTypeSelect.value;
+            DOMElements.cancelLinkEditBtn.addEventListener('click', () => { hideModal(DOMElements.linkEditModal); cancelLinkingMode(false); });
+            DOMElements.confirmLinkEditBtn.addEventListener('click', () => {
+                const sourceId = DOMElements.linkSourceIdInput.value;
+                const targetId = DOMElements.linkTargetIdInput.value;
+                const label = DOMElements.linkLabelInput.value;
+                const type = DOMElements.linkTypeSelect.value;
                 addOrUpdateLink(sourceId, targetId, label, type);
-                hideModal(linkEditModal);
+                hideModal(DOMElements.linkEditModal);
                 cancelLinkingMode(false);
             });
             
@@ -2076,7 +2190,7 @@
                         if (isTemplate) {
                             if (loadedData && Array.isArray(loadedData.chunks)) {
                                 loadTemplate(loadedData);
-                                hideModal(templatesModal);
+                                hideModal(DOMElements.templatesModal);
                                 showMessage('Template Loaded', `Successfully loaded custom template from ${file.name}.`);
                             } else {
                                 throw new Error("Invalid template file format. Expected 'chunks' array.");
@@ -2112,13 +2226,13 @@
                 reader.readAsText(file);
             };
 
-            fileLoadInput.addEventListener('change', (event) => {
-                fileLoadHandler(event.target.files[0], loadBtn, false);
+            DOMElements.fileLoadInput.addEventListener('change', (event) => {
+                fileLoadHandler(event.target.files[0], DOMElements.loadBtn, false);
                 event.target.value = null;
             });
-            customTemplateLoadInput.addEventListener('change', (event) => {
+            DOMElements.customTemplateLoadInput.addEventListener('change', (event) => {
                 const proceedLoad = () => {
-                    fileLoadHandler(event.target.files[0], loadCustomTemplateBtn, true);
+                    fileLoadHandler(event.target.files[0], DOMElements.loadCustomTemplateBtn, true);
                     event.target.value = null;
                 };
 
@@ -2133,11 +2247,11 @@
             });
             
             // Canvas and keyboard listeners
-            noteCanvasContainer.addEventListener('mousedown', (e) => { if (e.target === noteCanvasContainer || e.target === transformContainer || e.target === noteCanvas) { if (linkingMode) { deselectAllChunks(); return; } currentAction = 'pan'; const pointer = getPointerCoordinates(e); panStartX = pointer.x - translateX; panStartY = pointer.y - translateY; noteCanvasContainer.classList.add('panning'); document.addEventListener('mousemove', onInteractionMove); document.addEventListener('mouseup', onInteractionEnd); } else if (!e.target.closest('.chorus-chunk') && !e.target.closest('.toolbar') && !e.target.closest('.modal')) { deselectAllChunks(); } });
-            noteCanvasContainer.addEventListener('touchstart', (e) => { if (e.target === noteCanvasContainer || e.target === transformContainer || e.target === noteCanvas) { if (e.touches.length === 1) { if (linkingMode) { deselectAllChunks(); e.preventDefault(); return; } e.preventDefault(); currentAction = 'pan'; const pointer = getPointerCoordinates(e); panStartX = pointer.x - translateX; panStartY = pointer.y - translateY; noteCanvasContainer.classList.add('panning'); document.addEventListener('touchmove', onInteractionMove, { passive: false }); document.addEventListener('touchend', onInteractionEnd); } else if (e.touches.length === 2) { e.preventDefault(); currentAction = 'pinch-zoom'; noteCanvasContainer.classList.remove('panning'); const t1 = { x: e.touches[0].clientX, y: e.touches[0].clientY }; const t2 = { x: e.touches[1].clientX, y: e.touches[1].clientY }; initialPinchDistance = Math.hypot(t1.x - t2.x, t1.y - t2.y); } }  else if (!e.target.closest('.chorus-chunk') && !e.target.closest('.toolbar') && !e.target.closest('.modal')) { deselectAllChunks(); e.preventDefault(); } }, { passive: false });
-            noteCanvasContainer.addEventListener('wheel', (e) => { e.preventDefault(); const rect = noteCanvasContainer.getBoundingClientRect(); const mouseX = e.clientX - (rect.left || 0); const mouseY = e.clientY - (rect.top || 0); const worldXBeforeZoom = (mouseX - translateX) / scale; const worldYBeforeZoom = (mouseY - translateY) / scale; const delta = e.deltaY * ZOOM_SENSITIVITY * -1; let newScale = scale * (1 + delta); newScale = Math.max(MIN_SCALE, Math.min(newScale, MAX_SCALE)); translateX = mouseX - worldXBeforeZoom * newScale; translateY = mouseY - worldYBeforeZoom * newScale; scale = newScale; applyTransform(); }, { passive: false });
-            noteCanvasContainer.addEventListener('touchmove', (e) => { if (currentAction === 'pinch-zoom' && e.touches.length === 2) { e.preventDefault(); const t1 = { x: e.touches[0].clientX, y: e.touches[0].clientY }; const t2 = { x: e.touches[1].clientX, y: e.touches[1].clientY }; const currentPinchDistance = Math.hypot(t1.x - t2.x, t1.y - t2.y); const pinchMidpointScreen = { x: (t1.x + t2.x) / 2, y: (t1.y + t2.y) / 2 }; if (initialPinchDistance === null) { initialPinchDistance = currentPinchDistance; return; } const rect = noteCanvasContainer.getBoundingClientRect(); const worldMidXBeforeZoom = (pinchMidpointScreen.x - (rect.left || 0) - translateX) / scale; const worldMidYBeforeZoom = (pinchMidpointScreen.y - (rect.top || 0) - translateY) / scale; let scaleChange = currentPinchDistance / initialPinchDistance; let newScale = scale * scaleChange; newScale = Math.max(MIN_SCALE, Math.min(newScale, MAX_SCALE)); translateX = (pinchMidpointScreen.x - (rect.left || 0)) - worldMidXBeforeZoom * newScale; translateY = (pinchMidpointScreen.y - (rect.top || 0)) - worldMidYBeforeZoom * newScale; scale = newScale; applyTransform(); initialPinchDistance = currentPinchDistance; } }, { passive: false });
-            noteCanvasContainer.addEventListener('touchend', (e) => { if (e.touches.length < 2 && currentAction === 'pinch-zoom') { initialPinchDistance = null; currentAction = null; } });
+            DOMElements.noteCanvasContainer.addEventListener('mousedown', (e) => { if (e.target === DOMElements.noteCanvasContainer || e.target === DOMElements.transformContainer || e.target === DOMElements.noteCanvas) { if (linkingMode) { deselectAllChunks(); return; } currentAction = 'pan'; const pointer = getPointerCoordinates(e); panStartX = pointer.x - translateX; panStartY = pointer.y - translateY; DOMElements.noteCanvasContainer.classList.add('panning'); document.addEventListener('mousemove', onInteractionMove); document.addEventListener('mouseup', onInteractionEnd); } else if (!e.target.closest('.chorus-chunk') && !e.target.closest('.toolbar') && !e.target.closest('.modal')) { deselectAllChunks(); } });
+            DOMElements.noteCanvasContainer.addEventListener('touchstart', (e) => { if (e.target === DOMElements.noteCanvasContainer || e.target === DOMElements.transformContainer || e.target === DOMElements.noteCanvas) { if (e.touches.length === 1) { if (linkingMode) { deselectAllChunks(); e.preventDefault(); return; } e.preventDefault(); currentAction = 'pan'; const pointer = getPointerCoordinates(e); panStartX = pointer.x - translateX; panStartY = pointer.y - translateY; DOMElements.noteCanvasContainer.classList.add('panning'); document.addEventListener('touchmove', onInteractionMove, { passive: false }); document.addEventListener('touchend', onInteractionEnd); } else if (e.touches.length === 2) { e.preventDefault(); currentAction = 'pinch-zoom'; DOMElements.noteCanvasContainer.classList.remove('panning'); const t1 = { x: e.touches[0].clientX, y: e.touches[0].clientY }; const t2 = { x: e.touches[1].clientX, y: e.touches[1].clientY }; initialPinchDistance = Math.hypot(t1.x - t2.x, t1.y - t2.y); } }  else if (!e.target.closest('.chorus-chunk') && !e.target.closest('.toolbar') && !e.target.closest('.modal')) { deselectAllChunks(); e.preventDefault(); } }, { passive: false });
+            DOMElements.noteCanvasContainer.addEventListener('wheel', (e) => { e.preventDefault(); const rect = DOMElements.noteCanvasContainer.getBoundingClientRect(); const mouseX = e.clientX - (rect.left || 0); const mouseY = e.clientY - (rect.top || 0); const worldXBeforeZoom = (mouseX - translateX) / scale; const worldYBeforeZoom = (mouseY - translateY) / scale; const delta = e.deltaY * ZOOM_SENSITIVITY * -1; let newScale = scale * (1 + delta); newScale = Math.max(MIN_SCALE, Math.min(newScale, MAX_SCALE)); translateX = mouseX - worldXBeforeZoom * newScale; translateY = mouseY - worldYBeforeZoom * newScale; scale = newScale; applyTransform(); triggerAutoSave(); }, { passive: false });
+            DOMElements.noteCanvasContainer.addEventListener('touchmove', (e) => { if (currentAction === 'pinch-zoom' && e.touches.length === 2) { e.preventDefault(); const t1 = { x: e.touches[0].clientX, y: e.touches[0].clientY }; const t2 = { x: e.touches[1].clientX, y: e.touches[1].clientY }; const currentPinchDistance = Math.hypot(t1.x - t2.x, t1.y - t2.y); const pinchMidpointScreen = { x: (t1.x + t2.x) / 2, y: (t1.y + t2.y) / 2 }; if (initialPinchDistance === null) { initialPinchDistance = currentPinchDistance; return; } const rect = DOMElements.noteCanvasContainer.getBoundingClientRect(); const worldMidXBeforeZoom = (pinchMidpointScreen.x - (rect.left || 0) - translateX) / scale; const worldMidYBeforeZoom = (pinchMidpointScreen.y - (rect.top || 0) - translateY) / scale; let scaleChange = currentPinchDistance / initialPinchDistance; let newScale = scale * scaleChange; newScale = Math.max(MIN_SCALE, Math.min(newScale, MAX_SCALE)); translateX = (pinchMidpointScreen.x - (rect.left || 0)) - worldMidXBeforeZoom * newScale; translateY = (pinchMidpointScreen.y - (rect.top || 0)) - worldMidYBeforeZoom * newScale; scale = newScale; applyTransform(); initialPinchDistance = currentPinchDistance; triggerAutoSave(); } }, { passive: false });
+            DOMElements.noteCanvasContainer.addEventListener('touchend', (e) => { if (e.touches.length < 2 && currentAction === 'pinch-zoom') { initialPinchDistance = null; currentAction = null; } });
             document.addEventListener('keydown', (e) => { 
                 const activeEl = document.activeElement; 
                 const isInputFocused = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable); 
@@ -2145,21 +2259,21 @@
                 let shortcutHandled = false; 
                 if (isCtrlOrCmd) { 
                     switch (e.key.toLowerCase()) { 
-                        case 's': saveBtn.click(); shortcutHandled = true; break; 
-                        case 'o': loadBtn.click(); shortcutHandled = true; break; 
-                        case 'z': if (!undoDeleteBtn.disabled) { undoDeleteBtn.click(); shortcutHandled = true; } break; 
+                        case 's': DOMElements.saveBtn.click(); shortcutHandled = true; break; 
+                        case 'o': DOMElements.loadBtn.click(); shortcutHandled = true; break; 
+                        case 'z': if (!DOMElements.undoDeleteBtn.disabled) { DOMElements.undoDeleteBtn.click(); shortcutHandled = true; } break; 
                     } 
                 } 
                 if(shortcutHandled){ e.preventDefault(); return; } 
                 if (isInputFocused) { if (e.key === 'Escape') { activeEl.blur(); } return; } 
                 switch(e.key.toLowerCase()){ 
                     case 'escape': 
-                        if (!addChunkModal.classList.contains('hidden')) { hideModal(addChunkModal); } 
-                        else if (!editChunkModal.classList.contains('hidden')) { hideModal(editChunkModal); } 
-                        else if (!helpModal.classList.contains('hidden')) { hideModal(helpModal); } 
-                        else if (!messageModal.classList.contains('hidden')) { hideModal(messageModal); } 
-                        else if (!aiActionModal.classList.contains('hidden')) { hideModal(aiActionModal); } 
-                        else if (!settingsModal.classList.contains('hidden')) { hideModal(settingsModal); } 
+                        if (!DOMElements.addChunkModal.classList.contains('hidden')) { hideModal(DOMElements.addChunkModal); } 
+                        else if (!DOMElements.editChunkModal.classList.contains('hidden')) { hideModal(DOMElements.editChunkModal); } 
+                        else if (!DOMElements.helpModal.classList.contains('hidden')) { hideModal(DOMElements.helpModal); } 
+                        else if (!DOMElements.messageModal.classList.contains('hidden')) { hideModal(DOMElements.messageModal); } 
+                        else if (!DOMElements.aiActionModal.classList.contains('hidden')) { hideModal(DOMElements.aiActionModal); } 
+                        else if (!DOMElements.settingsModal.classList.contains('hidden')) { hideModal(DOMElements.settingsModal); } 
                         else if (linkingMode) { cancelLinkingMode(false); } 
                         else if (selectedChunkId) { deselectAllChunks(); } 
                         shortcutHandled = true; 
@@ -2174,13 +2288,33 @@
                             shortcutHandled = true; 
                         } 
                         break; 
-                    case 'a': addChunkBtn.click(); shortcutHandled = true; break; 
-                    case '+': case '=': zoomInBtn.click(); shortcutHandled = true; break; 
-                    case '-': zoomOutBtn.click(); shortcutHandled = true; break; 
-                    case '0': zoomResetBtn.click(); shortcutHandled = true; break; 
-                    case '?': case '/': helpBtn.click(); shortcutHandled = true; break; 
+                    case 'a': DOMElements.addChunkBtn.click(); shortcutHandled = true; break; 
+                    case '+': case '=': DOMElements.zoomInBtn.click(); shortcutHandled = true; break; 
+                    case '-': DOMElements.zoomOutBtn.click(); shortcutHandled = true; break; 
+                    case '0': DOMElements.zoomResetBtn.click(); shortcutHandled = true; break; 
+                    case '?': case '/': DOMElements.helpBtn.click(); shortcutHandled = true; break; 
                 } 
                 if(shortcutHandled){ e.preventDefault(); } 
+            });
+
+            DOMElements.continueSessionBtn.addEventListener('click', () => {
+                hideModal(DOMElements.sessionRestoreModal);
+                setupLayerControls(); // Re-setup layers based on loaded visibility
+                renderBoard(chunks); // Render the board with the loaded state
+                applyTransform();
+            });
+
+            DOMElements.startFreshBtn.addEventListener('click', () => {
+                hideModal(DOMElements.sessionRestoreModal);
+                clearAutoSave();
+                // Reset state variables to default
+                chunks = [];
+                lastDeletedChunk = null;
+                highestZIndex = 1;
+                Object.keys(layerVisibility).forEach(k => layerVisibility[k] = true);
+                
+                renderBoard([]); // Render a fresh board
+                resetAndCenterView();
             });
 
             // Final setup
@@ -2189,7 +2323,6 @@
 
             function setAppHeight() {
                 if (appContainer) {
-                    // Use window.innerHeight to get the actual visible viewport height
                     appContainer.style.height = `${window.innerHeight}px`;
                 }
             }
@@ -2204,13 +2337,20 @@
                 }); 
             });
             
-            // Set the height initially on load
             setAppHeight();
-            resetAndCenterView();
-            window.addEventListener('beforeunload', (event) => { if (chunks.length > 0) { event.preventDefault(); event.returnValue = ''; return ''; } });
+            
+            // Modified Init: Check for auto-save first
+            const sessionFound = loadSessionFromAutoSave();
+            if (!sessionFound) {
+                // If no session, start fresh
+                renderBoard([]);
+                resetAndCenterView();
+            }
+
+            window.addEventListener('beforeunload', (event) => { if (chunks.length > 0) { triggerAutoSave(); event.preventDefault(); event.returnValue = ''; return ''; } });
             setTimeout(() => { document.getElementById('noteCanvasContainer').focus(); }, 100);
             
-            console.log("CHORUS AI: Strategist's Edition V5 Initialized");
+            console.log("CHORUS AI: Strategist's Edition V5.1 Initialized");
         }
         initializeApp();
     });
