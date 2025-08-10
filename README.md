@@ -1,5 +1,5 @@
-# CHORUS Strategist's Edition
-This is a specialized version of the CHORUS thinking tool, adapted for strategic planning, wargaming, and competitive analysis. It replaces abstract concepts with a practical vocabulary for strategists, allowing you to map out complex operational environments.
+# CORE Strategist's Edition
+This is a specialized version of the CORE thinking tool, adapted for strategic planning, wargaming, and competitive analysis. It replaces abstract concepts with a practical vocabulary for strategists, allowing you to map out complex operational environments.
 
 Use it to visualize plans, analyze threats and opportunities, track resources, and simulate courses of action. The goal is to move beyond linear plans and embrace the dynamic, interconnected nature of strategy.
 
