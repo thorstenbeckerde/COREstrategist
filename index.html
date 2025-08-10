@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>CHORUS AI: Strategist's Edition V5.1</title>
+    <title>CORE AI: Strategist's Edition V5.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -433,7 +433,7 @@
 
     <!-- Footer -->
     <footer class="text-center p-2 text-xs print:hidden">
-        &copy; <span id="copyrightYear"></span> Thorsten Becker. CHORUS Strategist's Edition.
+        &copy; <span id="copyrightYear"></span> Thorsten Becker. CORE Strategist's Edition.
         <a href="https://www.linkedin.com/in/thorsten-becker-de/" target="_blank" class="text-blue-600 hover:underline">Connect on LinkedIn</a>.
     </footer>
 
@@ -583,11 +583,11 @@
     <div id="helpModal" class="modal hidden">
         <div class="modal-content">
             <span id="closeHelpModalSpan" class="close-button">&times;</span>
-            <h2>CHORUS Quick Help</h2>
+            <h2>CORE Quick Help</h2>
             <div id="help-scroll-content" class="modal-scroll-content">
                 <div class="help-section">
-                    <h3>What is CHORUS Strategist's Edition?</h3>
-                    <p class="mb-2">This is a specialized version of the CHORUS thinking tool, adapted for strategic planning, wargaming, and competitive analysis. It replaces abstract concepts with a practical vocabulary for strategists, allowing you to map out complex operational environments.</p>
+                    <h3>What is CORE Strategist's Edition?</h3>
+                    <p class="mb-2">This is a specialized version of the CORE thinking tool, adapted for strategic planning, wargaming, and competitive analysis. It replaces abstract concepts with a practical vocabulary for strategists, allowing you to map out complex operational environments.</p>
                     <p>Use it to visualize plans, analyze threats and opportunities, track resources, and simulate courses of action. The goal is to move beyond linear plans and embrace the dynamic, interconnected nature of strategy.</p>
                 </div>
                  <div class="help-section">
@@ -654,7 +654,7 @@
     <div id="supportModal" class="modal hidden">
         <div class="modal-content">
              <span class="close-button" onclick="this.parentElement.parentElement.classList.add('hidden')">&times;</span>
-             <h2 class="text-xl font-semibold mb-3">Support CHORUS Strategy</h2>
+             <h2 class="text-xl font-semibold mb-3">Support CORE Strategy</h2>
              <p class="mb-4">Thank you for considering a donation! This project is developed and maintained by an independent creator. Your support helps keep the app free and growing.</p>
              <p>You can support the project here: <a href="https://ko-fi.com/thorstenbecker" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline font-semibold">Ko-fi.com/thorstenbecker</a></p>
              <div class="mt-6 flex justify-end">
@@ -1870,13 +1870,13 @@
             chunks.forEach(chunk => { if (!visited.has(chunk.id)) { traverse(chunk.id); } });
 
             if (format === 'html') {
-                 return `<!DOCTYPE html><html><head><title>CHORUS Export</title><style>body{font-family:sans-serif;line-height:1.6;} .chunk{background:#f9f9f9;}</style></head><body><h1>CHORUS Export</h1>${output}</body></html>`;
+                 return `<!DOCTYPE html><html><head><title>CORE Export</title><style>body{font-family:sans-serif;line-height:1.6;} .chunk{background:#f9f9f9;}</style></head><body><h1>CORE Export</h1>${output}</body></html>`;
             }
 
             return output;
         }
 
-        function saveDataToFile() { chunks.forEach(chunkData => { const chunkElement = document.getElementById(chunkData.id); if (chunkElement) { const contentDiv = chunkElement.querySelector('.chunk-content'); if (contentDiv) { chunkData.text = contentDiv.innerHTML; } } }); if (chunks.length === 0) { showMessage("Empty Board", "There are no notes to save."); return; } setButtonLoading(DOMElements.saveBtn, true); try { const dataToSave = { chunks: chunks, viewport: { scale: scale, translateX: translateX, translateY: translateY } }; const dataStr = JSON.stringify(dataToSave, null, 2); downloadFile(dataStr, 'chorus-strategist-map.json', 'application/json'); showMessage('Saved to File', 'Your board has been prepared for download.'); } catch (error) { showMessage('Save Error', `Could not prepare data for saving: ${error.message}`); console.error("Save error:", error); } finally { setButtonLoading(DOMElements.saveBtn, false); } }
+        function saveDataToFile() { chunks.forEach(chunkData => { const chunkElement = document.getElementById(chunkData.id); if (chunkElement) { const contentDiv = chunkElement.querySelector('.chunk-content'); if (contentDiv) { chunkData.text = contentDiv.innerHTML; } } }); if (chunks.length === 0) { showMessage("Empty Board", "There are no notes to save."); return; } setButtonLoading(DOMElements.saveBtn, true); try { const dataToSave = { chunks: chunks, viewport: { scale: scale, translateX: translateX, translateY: translateY } }; const dataStr = JSON.stringify(dataToSave, null, 2); downloadFile(dataStr, 'core-strategist-map.json', 'application/json'); showMessage('Saved to File', 'Your board has been prepared for download.'); } catch (error) { showMessage('Save Error', `Could not prepare data for saving: ${error.message}`); console.error("Save error:", error); } finally { setButtonLoading(DOMElements.saveBtn, false); } }
         
         function saveAsTemplate() {
             if (chunks.length === 0) {
@@ -2108,24 +2108,24 @@
             
             // Export Button Events
             DOMElements.exportTxtBtn.addEventListener('click', () => {
-                downloadFile(getCombinedTextForExport('txt'), 'chorus-export.txt', 'text/plain;charset=utf-8');
+                downloadFile(getCombinedTextForExport('txt'), 'core-strategist-export.txt', 'text/plain;charset=utf-8');
                 document.querySelectorAll('.dropdown-content.show').forEach(openContent => openContent.classList.remove('show'));
             });
             DOMElements.exportMdBtn.addEventListener('click', () => {
-                downloadFile(getCombinedTextForExport('md'), 'chorus-export.md', 'text/markdown;charset=utf-8');
+                downloadFile(getCombinedTextForExport('md'), 'core-strategist-export.md', 'text/markdown;charset=utf-8');
                 document.querySelectorAll('.dropdown-content.show').forEach(openContent => openContent.classList.remove('show'));
             });
             DOMElements.exportHtmlBtn.addEventListener('click', () => {
-                downloadFile(getCombinedTextForExport('html'), 'chorus-export.html', 'text/html;charset=utf-8');
+                downloadFile(getCombinedTextForExport('html'), 'core-strategist-export.html', 'text/html;charset=utf-8');
                 document.querySelectorAll('.dropdown-content.show').forEach(openContent => openContent.classList.remove('show'));
             });
             DOMElements.exportJsonBtn.addEventListener('click', () => {
                 const dataToSave = { chunks: chunks, viewport: { scale: scale, translateX: translateX, translateY: translateY } };
-                downloadFile(JSON.stringify(dataToSave, null, 2), 'chorus-export.json', 'application/json');
+                downloadFile(JSON.stringify(dataToSave, null, 2), 'core-strategist-export.json', 'application/json');
                 document.querySelectorAll('.dropdown-content.show').forEach(openContent => openContent.classList.remove('show'));
             });
             DOMElements.exportCsvBtn.addEventListener('click', () => {
-                downloadFile(getCombinedTextForExport('csv'), 'chorus-export.csv', 'text/csv;charset=utf-8');
+                downloadFile(getCombinedTextForExport('csv'), 'core-strategist-export.csv', 'text/csv;charset=utf-8');
                 document.querySelectorAll('.dropdown-content.show').forEach(openContent => openContent.classList.remove('show'));
             });
 
@@ -2350,7 +2350,7 @@
             window.addEventListener('beforeunload', (event) => { if (chunks.length > 0) { triggerAutoSave(); event.preventDefault(); event.returnValue = ''; return ''; } });
             setTimeout(() => { document.getElementById('noteCanvasContainer').focus(); }, 100);
             
-            console.log("CHORUS AI: Strategist's Edition V5.1 Initialized");
+            console.log("CORE AI: Strategist's Edition V5.1 Initialized");
         }
         initializeApp();
     });
